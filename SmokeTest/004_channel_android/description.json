@@ -1,7 +1,7 @@
 {
-	"description": "",
+	"description": "引入公共方法，关注申请弹窗/取关/进入特定用户会话/通过link进入订阅号/搜索城市",
 	"devicePlatform": [
-		"Android"
+		"Common"
 	],
 	"imageSaveCount": [
 		0,

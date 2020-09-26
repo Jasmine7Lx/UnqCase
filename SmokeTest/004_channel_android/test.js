@@ -8,22 +8,29 @@ module.exports = async function main (operation,directoryPath,directoryName) {
 //检查是否有邀请好友弹窗
 // if(await operation[0].removeBackgroundExist({imgName:'scriptImg_1597888082608'})){
 // }
+const {
+  followPopAction,
+  unfollowAction,
+  deleteChatAction,
+  enterChannelbyLink,
+  searchCityAction,
+} = require("../../commonMethod/channelAction.js");
+
+const {
+  enterTargetChatView,
+  sendLinkMsgAction,
+} = require("../../commonMethod/chatAssistActions.js");
 
 /** 进入特定用户会话页，先删除相关的记录 */
-await operation[0].imgTap({ imgName: "scriptImg_1593766542666" });
-await operation[0].keys("13609729257");
-await operation[0].imgTap({ imgName: "scriptImg_1597394877585" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
-await operation[0].imgTap({ imgName: "scriptImg_1597397967493" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398677059" });
+await enterTargetChatView(operation[0], "13609729257");
+await deleteChatAction(operation[0]);
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 服务号关注 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 通过链接进入特定服务号 */
-await operation[0].keys("https://channel.imo.im/57532636");
-await operation[0].imgTap({ imgName: "scriptImg_1597395689900" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597395723143" });
+let commonChannelLink = "https://channel.imo.im/57532636";
+await enterChannelbyLink(operation[0], commonChannelLink);
 
 /** 关注订阅号 */
 await operation[0].imgTap({ imgName: "scriptImg_1597398414134" });
@@ -494,8 +501,8 @@ try {
 
 /** 进入设置页取关订阅号 */
 await operation[0].imgTap({ imgName: "scriptImg_1599127391430" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597398502063" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398539318" });
+await unfollowAction(operation[0]);
+
 await operation[0].imgAssert({ imgName: "scriptImg_1599125654552" });
 
 /** ---------------------------------------------------------------------------------------  */
@@ -524,8 +531,7 @@ try {
 
 /** 进入设置页取关订阅号 */
 await operation[0].imgTap({ imgName: "scriptImg_1597395850651" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597398502063" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398539318" });
+await unfollowAction(operation[0]);
 await operation[0].imgAssert({ imgName: "scriptImg_1599128209859" });
 
 /** ---------------------------------------------------------------------------------------  */
@@ -541,8 +547,7 @@ await searchChat.click();
 
 /** 进入设置页取关订阅号 */
 await operation[0].imgTap({ imgName: "scriptImg_1599127391430" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597398502063" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398539318" });
+await unfollowAction(operation[0]);
 await operation[0].removeBackgroundExist({
   imgName: "scriptImg_1597395723143",
 });
@@ -552,62 +557,34 @@ await operation[0].finishedCase("channel_unfollow_android_001");
 
 /** 首次退出关注引导 */
 await operation[0].back();
-if (
-  await operation[0].removeBackgroundExist({
-    imgName: "scriptImg_1598320795784",
-  })
-) {
-  await operation[0].removeBackgroundTap({
-    imgName: "scriptImg_1597398636865",
-  });
-} else if (
-  await operation[0].imgExist({ imgName: "scriptImg_1599135125417" })
-) {
-  await operation[0].imgTap({ imgName: "scriptImg_1597398636865" });
-}
+await followPopAction(operation[0], "cancel");
 
 /** 删除聊天记录 */
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
-await operation[0].imgTap({ imgName: "scriptImg_1597397967493" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398677059" });
+await deleteChatAction(operation[0]);
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 天气服务号 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 进入服务号页面 */
-await operation[0].keys("https://channel.imo.im/42220108");
-await operation[0].imgTap({ imgName: "scriptImg_1597395689900" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597395723143" });
+let weatherChannelLink = "https://channel.imo.im/42220108";
+await enterChannelbyLink(operation[0], weatherChannelLink);
+
 if (await operation[0].imgExist({ imgName: "scriptImg_1597399803799" })) {
   await operation[0].permissionAllow();
 }
 
 /** 切换城市 */
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597399974048" });
-/** follow按钮有ab实验 */
-if (
-  await operation[0].removeBackgroundExist({
-    imgName: "scriptImg_1598320795784",
-  })
-) {
-  await operation[0].removeBackgroundTap({
-    imgName: "scriptImg_1598320795784",
-  });
-} else if (
-  await operation[0].imgExist({ imgName: "scriptImg_1599135125417" })
-) {
-  await operation[0].imgTap({ imgName: "scriptImg_1599135125417" });
-}
+
+await followPopAction(operation[0], "follow");
 
 await operation[0].removeBackgroundAssert({
   imgName: "scriptImg_1597400059257",
 });
 await operation[0].finishedCase("channel_weather_follow_android_001");
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597400059257" });
-await operation[0].keys("Delhi");
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597400417108" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597400435871" });
-await operation[0].imgTap({ imgName: "scriptImg_1597400447945" });
+
+await searchCityAction(operation[0], "Delhi");
+
 await operation[0].removeBackgroundAssert({
   imgName: "scriptImg_1597400496777",
 });
@@ -615,35 +592,21 @@ await operation[0].finishedCase("channel_weather_changecity_android_001");
 
 /** 取关，重置状态 */
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597395850651" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597398502063" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398539318" });
+await unfollowAction(operation[0]);
 
 /** 删除聊天记录，方便下次执行 */
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
-await operation[0].imgTap({ imgName: "scriptImg_1597397967493" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398677059" });
+await deleteChatAction(operation[0]);
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 祷告服务号 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
+
 /** 进入祷告服务号 */
-await operation[0].keys("https://channel.imo.im/25453873");
-await operation[0].imgTap({ imgName: "scriptImg_1597395689900" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597395723143" });
+let prayChannelLink = "https://channel.imo.im/25453873";
+await enterChannelbyLink(operation[0], prayChannelLink);
+
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597889506328" });
-if (
-  await operation[0].removeBackgroundExist({
-    imgName: "scriptImg_1598320795784",
-  })
-) {
-  await operation[0].removeBackgroundTap({
-    imgName: "scriptImg_1598320795784",
-  });
-} else if (
-  await operation[0].imgExist({ imgName: "scriptImg_1599135125417" })
-) {
-  await operation[0].imgTap({ imgName: "scriptImg_1599135125417" });
-}
+await followPopAction(operation[0], "follow");
 
 await operation[0].removeBackgroundAssert({
   imgName: "scriptImg_1597400059257",
@@ -651,11 +614,7 @@ await operation[0].removeBackgroundAssert({
 await operation[0].finishedCase("channel_pray_follow_android_001");
 
 /** 切换祷告城市 */
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597400059257" });
-await operation[0].keys("Delhi");
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597400417108" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597400435871" });
-await operation[0].imgTap({ imgName: "scriptImg_1597400447945" });
+await searchCityAction(operation[0], "Delhi");
 
 await operation[0].removeBackgroundAssert({
   imgName: "scriptImg_1597889920679",
@@ -665,19 +624,7 @@ await operation[0].finishedCase("channel_prayer_changecity_android_001");
 /** 执行祷告 */
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597890185666" });
 
-if (
-  await operation[0].removeBackgroundExist({
-    imgName: "scriptImg_1598320795784",
-  })
-) {
-  await operation[0].removeBackgroundTap({
-    imgName: "scriptImg_1598320795784",
-  });
-} else if (
-  await operation[0].imgExist({ imgName: "scriptImg_1599135125417" })
-) {
-  await operation[0].imgTap({ imgName: "scriptImg_1599135125417" });
-}
+await followPopAction(operation[0], "follow");
 
 await operation[0].removeBackgroundAssert({
   imgName: "scriptImg_1597890267391",
@@ -687,8 +634,7 @@ await operation[0].finishedCase("channel_prayer_pray_android_001");
 /** 取关，重置未祷告状态 */
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597891412647" });
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597395850651" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597398502063" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398539318" });
+await unfollowAction(operation[0]);
 
   await operation.resultOutput();
 }
