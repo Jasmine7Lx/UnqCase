@@ -1,0 +1,41 @@
+{
+	"description": "完成四种类型发布/删除/查看、帖子详情页点赞/评论/一键转发（分享功能暂未实现、各列表页面加载功能",
+	"devicePlatform": [
+		"Android"
+	],
+	"imageSaveCount": [
+		0,
+		0,
+		0
+	],
+	"cases": [
+		"myplanet_list_friends_swipe_android_001",
+		"myplanet_list_topic_swipe_android_001",
+		"myplanet_list_foryou_swipe_android_001",
+		"myplanet_list_notice_swipe_android_001",
+		"myplanet_list_profile_posts_swipe_android_001",
+		"myplanet_list_profile_posts_swipe_android_001",
+		"myplanet_list_profile_likes_swipe_android_001",
+		"myplanet_list_following_swipe_android_001",
+		"myplanet_list_followers_swipe_android_001",
+		"myplanet_list_recommend_swipe_android_001",
+		"myplanet_publish_uicheck_android_001",
+		"myplanet_publish_photo_android_001",
+		"myplanet_publish_delete_android_001",
+		"myplanet_publish_video_android_001",
+		"myplanet_publish_link_android_001",
+		"myplanet_publish_textcard_android_001",
+		"myplanet_link_view_android_001",
+		"myplanet_post_detail_uicheck_android_001",
+		"myplanet_post_like_android_001",
+		"myplanet_post_repost_android_001",
+		"myplanet_post_comment_android_001",
+		"myplanet_video_full_screen_play_android_001",
+		"myplanet_video_play_android_001",
+		"myplanet_photo_view_android_001",
+		"myplanet_publish_delete_android_001"
+	],
+	"version": 1,
+	"scriptIdentity": 1598845992205,
+	"checkDynamicSpecialEffects": false
+}

@@ -1,0 +1,40 @@
+{
+	"description": "",
+	"devicePlatform": [
+		"Android"
+	],
+	"imageSaveCount": [
+		0,
+		0,
+		0
+	],
+	"cases": [
+		"channel_follow_android_001",
+		"channel_photo_view_android_001",
+		"channel_photo_share_story_android_001",
+		"channel_photo_share_singlechat_android_001",
+		"channel_photo_share_groupchat_android_001",
+		"channel_photo_share_biggroupchat_android_001",
+		"channel_video_view_android_001",
+		"channel_video_share_story_android_001",
+		"channel_video_share_singlechat_android_001",
+		"channel_video_share_groupchat_android_001",
+		"channel_video_share_biggroupchat_android_001",
+		"channel_link_view_android_001",
+		"channel_link_share_story_android_001",
+		"channel_link_share_singlechat_android_001",
+		"channel_link_share_groupchat_android_001",
+		"channel_link_share_biggroupchat_android_001",
+		"channel_repost_follow_android_001",
+		"channel_account_follow_android_001",
+		"channel_unfollow_android_001",
+		"channel_weather_follow_android_001",
+		"channel_weather_changecity_android_001",
+		"channel_pray_follow_android_001",
+		"channel_prayer_changecity_android_001",
+		"channel_prayer_pray_android_001"
+	],
+	"version": 1,
+	"scriptIdentity": 1597401282360,
+	"checkDynamicSpecialEffects": false
+}
