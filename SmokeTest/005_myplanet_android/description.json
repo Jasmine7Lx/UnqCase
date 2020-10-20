@@ -1,5 +1,5 @@
 {
-	"description": "完成四种类型发布/删除/查看、帖子详情页点赞/评论/一键转发（分享功能暂未实现、各列表页面加载功能",
+	"description": "完成纯文本/图片/视频/链接的发布/删除/查看、帖子详情页点赞/评论/一键转发、各列表页面加载功能、图片/视频/链接帖子分享到story/单聊/讨论组/大群",
 	"devicePlatform": [
 		"Android"
 	],
@@ -30,9 +30,21 @@
 		"myplanet_post_like_android_001",
 		"myplanet_post_repost_android_001",
 		"myplanet_post_comment_android_001",
+		"myplanet_link_share_story_android_001",
+		"myplanet_link_share_singlechat_android_001",
+		"myplanet_link_share_groupchat_android_001",
+		"myplanet_link_share_biggroupchat_android_001",
 		"myplanet_video_full_screen_play_android_001",
 		"myplanet_video_play_android_001",
+		"myplanet_video_share_story_android_001",
+		"myplanet_video_share_singlechat_android_001",
+		"myplanet_video_share_groupchat_android_001",
+		"myplanet_video_share_biggroupchat_android_001",
 		"myplanet_photo_view_android_001",
+		"myplanet_photo_share_story_android_001",
+		"myplanet_photo_share_singlechat_android_001",
+		"myplanet_photo_share_groupchat_android_001",
+		"myplanet_photo_share_biggroupchat_android_001",
 		"myplanet_publish_delete_android_001"
 	],
 	"version": 1,
