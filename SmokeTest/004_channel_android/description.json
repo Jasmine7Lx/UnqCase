@@ -1,5 +1,5 @@
 {
-	"description": "完成订阅号关注/取关、内容卡片详情页功能检查（图片/视频/链接/账号卡片/转载卡片）、订阅号卡片分享到story/单聊/讨论组/大群（图片/视频/链接/订阅号profile页）",
+	"description": "完成订阅号关注/取关、内容卡片详情页功能检查（图片/视频/链接/账号卡片/转载卡片）、订阅号卡片分享到story/单聊/讨论组/大群（图片/视频/链接/订阅号profile页",
 	"devicePlatform": [
 		"Android"
 	],
@@ -34,7 +34,7 @@
 		"channel_unfollow_android_001",
 		"channel_weather_follow_android_001",
 		"channel_weather_changecity_android_001",
-		"channel_account_share_story_android_001",
+		"channel_weather_share_story_android_001",
 		"channel_weather_share_singlechat_android_001",
 		"channel_weather_share_groupchat_android_001",
 		"channel_weather_share_biggroupchat_android_001",
