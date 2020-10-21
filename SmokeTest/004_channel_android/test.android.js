@@ -19,7 +19,7 @@ const {
   findSwiftElementAction,
   storyCheckAction,
   chatCheckAction,
-} = require("../../commonMethod/channelAction.js");
+} = require("../../commonMethod/channelActions.js");
 
 const {
   enterTargetChatView,

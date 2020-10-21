@@ -8,6 +8,18 @@ const {
   enterTargetChatView,
 } = require("../../commonMethod/chatAssistActions.js");
 
+const {
+  shareMoreAction,
+  shareStoryAction,
+  storyCheckAction,
+  chatCheckAction,
+} = require("../../commonMethod/channelActions.js");
+
+const {
+  swipeTimesAction,
+  listSwipeAction,
+} = require("../../commonMethod/myplanetActions.js");
+
 /** 进入内容流 */
 let myplanetEntrance = await operation[0].driver.element(
   "xpath",
@@ -19,48 +31,20 @@ await myplanetEntrance.click();
 /** --------------------------------------- myplanet内列表滑动------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 滑动列表--关注流 */
-let friendsList = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/tabTitle'][@text='Friends']"
-);
-await friendsList.click();
-await new Promise((resolve) => setTimeout(resolve, 3000));
-for (var i = 0; i <= 10; i++) {
-  await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-}
+await listSwipeAction(operation[0], "friends", "up", 20);
 await operation[0].finishedCase("myplanet_list_friends_swipe_android_001");
 
 /** 滑动列表--话题详情页 */
-let foryouList = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/tabTitle'][@text='For you']"
-);
-await foryouList.click();
-await operation[0].elementTap(
-  '{"elementKey":"elementKeyNum_1255","platformName":"Android"}'
-);
-await new Promise((resolve) => setTimeout(resolve, 3000));
-for (var i = 0; i <= 10; i++) {
-  await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-}
+await listSwipeAction(operation[0], "topic", "up", 20);
 await operation[0].finishedCase("myplanet_list_topic_swipe_android_001");
+await operation[0].back();
 
 /** 滑动列表--推荐流 */
-await operation[0].driver.back();
-for (var i = 0; i <= 10; i++) {
-  await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-}
+await listSwipeAction(operation[0], "foryou", "up", 20);
 await operation[0].finishedCase("myplanet_list_foryou_swipe_android_001");
 
 /** 滑动列表--通知中心 */
-let noticeList = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/iv_notice"
-);
-await noticeList.click();
-for (var i = 0; i <= 10; i++) {
-  await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-}
+await listSwipeAction(operation[0], "notice", "up", 20);
 await operation[0].finishedCase("myplanet_list_notice_swipe_android_001");
 await operation[0].driver.back();
 
@@ -554,95 +538,42 @@ await operation[0].swipe(561 / 1080, 391 / 1920, 539 / 1080, 1500 / 1920);
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 分享链接帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
+/** 分享到单聊/讨论组/大群 */
 await operation[0].imgTap({ imgName: "scriptImg_1603188213914" });
-
-let searchBox = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/search_box"
+let shareChats = new Array(
+  "Imo_Auto_B",
+  "Invincible_Imo_Auto_Group",
+  "Super_Imo_Auto_Biggroup"
 );
-let chooseBox = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/checkbox"
-);
+await shareMoreAction(operation[0], shareChats);
 
-/** 1、分享到单聊 */
-await searchBox.click();
-await operation[0].keys("Imo_Auto_B");
-await chooseBox.click();
-/** 2、分享到讨论组 */
-await searchBox.click();
-await operation[0].keys("Invincible_Imo_Auto_Group");
-await chooseBox.click();
-/** 3、分享到大群 */
-await searchBox.click();
-await operation[0].keys("Super_Imo_Auto_Biggroup");
-await chooseBox.click();
-/** 4、分享到story */
-let storyEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/toptext'][@text='My Story']"
-);
-await storyEntrance.click();
+/** 分享到story */
+await operation[0].imgTap({ imgName: "scriptImg_1603188213914" });
+await shareStoryAction(operation[0], "mystory");
 
-await operation[0].imgTap({ imgName: "scriptImg_1598603579123" });
+/** 返回到首页 */
 await operation[0].back();
 await operation[0].back();
 await operation[0].back();
 
 /** 进入story检查 */
-let mystoryEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/name'][@text='My Story']"
-);
-await mystoryEntrance.click();
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603188745749" });
-} catch (err) {
-  await operation[0].stepTag("链接帖子分享到story失败");
-}
+let linkStoryImg = "scriptImg_1599657131665";
+await storyCheckAction(operation[0], linkStoryImg);
 await operation[0].finishedCase("myplanet_link_share_story_android_001");
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1599657167481" });
-await operation[0].imgTap({ imgName: "scriptImg_1599657179326" });
-await operation[0].back();
 
+let linkChatImg = "scriptImg_1603188745749";
 /** 进入单聊会话页检查 */
-await enterTargetChatView(operation[0], "Imo_Auto_B");
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603188745749" });
-} catch (err) {
-  await operation[0].stepTag("链接帖子分享到单聊失败");
-}
+await chatCheckAction(operation[0], "Imo_Auto_B", linkChatImg);
 await operation[0].finishedCase("myplanet_link_share_singlechat_android_001");
 await operation[0].back();
 
 /** 进入讨论组会话页检查 */
-await enterTargetChatView(operation[0], "Invincible_Imo_Auto_Group");
-
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603188745749" });
-} catch (err) {
-  await operation[0].stepTag("链接帖子分享到讨论组失败");
-}
+await chatCheckAction(operation[0], "Invincible_Imo_Auto_Group", linkChatImg);
 await operation[0].finishedCase("myplanet_link_share_groupchat_android_001");
 await operation[0].back();
 
 /** 进入大群会话页检查 */
-await enterTargetChatView(operation[0], "Super_Imo_Auto_Biggroup");
-
-//处理命中表情引导
-if (await operation[0].imgExist({ imgName: "scriptImg_1599658120110" })) {
-  let chatInput = await operation[0].driver.element(
-    "id",
-    "com.imo.android.imoimalpha:id/chat_input"
-  );
-  await chatInput.click();
-}
-
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603188745749" });
-} catch (err) {
-  await operation[0].stepTag("链接帖子分享到大群失败");
-}
+await chatCheckAction(operation[0], "Super_Imo_Auto_Biggroup", linkChatImg);
 await operation[0].finishedCase("myplanet_link_share_biggroupchat_android_001");
 await operation[0].back();
 await operation[0].back();
@@ -680,86 +611,40 @@ await operation[0].finishedCase("myplanet_video_play_android_001");
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 分享视频帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
+/** 分享到单聊/讨论组/大群 */
 await operation[0].imgTap({ imgName: "scriptImg_1603188213914" });
-
-searchBox = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/search_box"
+shareChats = new Array(
+  "Imo_Auto_B",
+  "Invincible_Imo_Auto_Group",
+  "Super_Imo_Auto_Biggroup"
 );
-chooseBox = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/checkbox"
-);
+await shareMoreAction(operation[0], shareChats);
 
-/** 1、分享到单聊 */
-await searchBox.click();
-await operation[0].keys("Imo_Auto_B");
-await chooseBox.click();
-/** 2、分享到讨论组 */
-await searchBox.click();
-await operation[0].keys("Invincible_Imo_Auto_Group");
-await chooseBox.click();
-/** 3、分享到大群 */
-await searchBox.click();
-await operation[0].keys("Super_Imo_Auto_Biggroup");
-await chooseBox.click();
-/** 4、分享到story */
-storyEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/toptext'][@text='My Story']"
-);
-await storyEntrance.click();
-
-await operation[0].imgTap({ imgName: "scriptImg_1598603579123" });
+/** 分享到story */
+await operation[0].imgTap({ imgName: "scriptImg_1603188213914" });
+await shareStoryAction(operation[0], "mystory");
 await operation[0].back();
 await operation[0].back();
 await operation[0].back();
 
 /** 进入story检查 */
-mystoryEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/name'][@text='My Story']"
-);
-await mystoryEntrance.click();
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603188745749" });
-} catch (err) {
-  await operation[0].stepTag("视频帖子分享到story失败");
-}
+let videoStoryImg = "scriptImg_1603188745749";
+await storyCheckAction(operation[0], videoStoryImg);
 await operation[0].finishedCase("myplanet_video_share_story_android_001");
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1599657167481" });
-await operation[0].imgTap({ imgName: "scriptImg_1599657179326" });
-await operation[0].back();
 
+let videoChatImg = "scriptImg_1603199595734";
 /** 进入单聊会话页检查 */
-await enterTargetChatView(operation[0], "Imo_Auto_B");
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603199595734" });
-} catch (err) {
-  await operation[0].stepTag("视频帖子分享到单聊失败");
-}
+await chatCheckAction(operation[0], "Imo_Auto_B", videoChatImg);
 await operation[0].finishedCase("myplanet_video_share_singlechat_android_001");
 await operation[0].back();
 
 /** 进入讨论组会话页检查 */
-await enterTargetChatView(operation[0], "Invincible_Imo_Auto_Group");
-
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603199595734" });
-} catch (err) {
-  await operation[0].stepTag("视频帖子分享到讨论组失败");
-}
+await chatCheckAction(operation[0], "Invincible_Imo_Auto_Group", videoChatImg);
 await operation[0].finishedCase("myplanet_video_share_groupchat_android_001");
 await operation[0].back();
 
 /** 进入大群会话页检查 */
-await enterTargetChatView(operation[0], "Super_Imo_Auto_Biggroup");
-
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603199595734" });
-} catch (err) {
-  await operation[0].stepTag("视频帖子分享到大群失败");
-}
+await chatCheckAction(operation[0], "Super_Imo_Auto_Biggroup", videoChatImg);
 await operation[0].finishedCase(
   "myplanet_video_share_biggroupchat_android_001"
 );
@@ -794,99 +679,42 @@ await operation[0].finishedCase("myplanet_photo_view_android_001");
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 分享图片帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
+/** 分享到单聊/讨论组/大群 */
 await operation[0].imgTap({ imgName: "scriptImg_1603200128685" });
 await operation[0].imgTap({ imgName: "scriptImg_1603188213914" });
-
-searchBox = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/search_box"
+shareChats = new Array(
+  "Imo_Auto_B",
+  "Invincible_Imo_Auto_Group",
+  "Super_Imo_Auto_Biggroup"
 );
-chooseBox = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/checkbox"
-);
+await shareMoreAction(operation[0], shareChats);
 
-/** 1、分享到单聊 */
-await searchBox.click();
-await operation[0].keys("Imo_Auto_B");
-await chooseBox.click();
-/** 2、分享到讨论组 */
-await searchBox.click();
-await operation[0].keys("Invincible_Imo_Auto_Group");
-await chooseBox.click();
-/** 3、分享到大群 */
-await searchBox.click();
-await operation[0].keys("Super_Imo_Auto_Biggroup");
-await chooseBox.click();
-/** 4、分享到story */
-storyEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/toptext'][@text='My Story']"
-);
-await storyEntrance.click();
-
-await operation[0].imgTap({ imgName: "scriptImg_1598603579123" });
+/** 分享到story */
+await operation[0].imgTap({ imgName: "scriptImg_1603200128685" });
+await operation[0].imgTap({ imgName: "scriptImg_1603188213914" });
+await shareStoryAction(operation[0], "mystory");
 await operation[0].back();
 await operation[0].back();
 await operation[0].back();
 
 /** 进入story检查 */
-mystoryEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/name'][@text='My Story']"
-);
-await mystoryEntrance.click();
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603188745749" });
-} catch (err) {
-  await operation[0].stepTag("图片帖子分享到story失败");
-}
+let videoStoryImg = "scriptImg_1603188745749";
+await storyCheckAction(operation[0], videoStoryImg);
 await operation[0].finishedCase("myplanet_photo_share_story_android_001");
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1599657167481" });
-await operation[0].imgTap({ imgName: "scriptImg_1599657179326" });
-await operation[0].back();
 
-const {
-  enterTargetChatView,
-} = require("../../commonMethod/chatAssistActions.js");
+let photoChatImg = "scriptImg_1603200409827";
 /** 进入单聊会话页检查 */
-await enterTargetChatView(operation[0], "Imo_Auto_B");
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603200409827" });
-} catch (err) {
-  await operation[0].stepTag("图片帖子分享到单聊失败");
-}
+await chatCheckAction(operation[0], "Imo_Auto_B", photoChatImg);
 await operation[0].finishedCase("myplanet_photo_share_singlechat_android_001");
 await operation[0].back();
 
 /** 进入讨论组会话页检查 */
-await enterTargetChatView(operation[0], "Invincible_Imo_Auto_Group");
-
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603200409827" });
-} catch (err) {
-  await operation[0].stepTag("图片帖子分享到讨论组失败");
-}
+await chatCheckAction(operation[0], "Invincible_Imo_Auto_Group", photoChatImg);
 await operation[0].finishedCase("myplanet_photo_share_groupchat_android_001");
 await operation[0].back();
 
 /** 进入大群会话页检查 */
-await enterTargetChatView(operation[0], "Super_Imo_Auto_Biggroup");
-
-//处理命中表情引导
-if (await operation[0].imgExist({ imgName: "scriptImg_1599658120110" })) {
-  let chatInput = await operation[0].driver.element(
-    "id",
-    "com.imo.android.imoimalpha:id/chat_input"
-  );
-  await chatInput.click();
-}
-
-try {
-  await operation[0].imgAssert({ imgName: "scriptImg_1603200409827" });
-} catch (err) {
-  await operation[0].stepTag("图片帖子分享到大群失败");
-}
+await chatCheckAction(operation[0], "Super_Imo_Auto_Biggroup", photoChatImg);
 await operation[0].finishedCase(
   "myplanet_photo_share_biggroupchat_android_001"
 );
