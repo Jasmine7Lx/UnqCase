@@ -44,7 +44,7 @@ await listSwipeAction(operation[0], "foryou", "up", 20);
 await operation[0].finishedCase("myplanet_list_foryou_swipe_android_001");
 
 /** 滑动列表--通知中心 */
-await listSwipeAction(operation[0], "notice", "up", 20);
+await listSwipeAction(operation[0], "notice", "up", 10);
 await operation[0].finishedCase("myplanet_list_notice_swipe_android_001");
 await operation[0].driver.back();
 
