@@ -495,7 +495,6 @@ await operation[0].finishedCase("channel_prayer_pray_android_001");
 /** 分享到单聊/讨论中/大群 **/
 await operation[0].imgTap({ imgName: "scriptImg_1603179542791" });
 await new Promise((resolve) => setTimeout(resolve, 3000));
-await sleep;
 shareChats = new Array(
   "Imo_Auto_B",
   "Invincible_Imo_Auto_Group",
