@@ -36,10 +36,10 @@ await myplanetEntrance.click();
 await listSwipeAction(operation[0], "friends", "up", 20);
 await operation[0].finishedCase("myplanet_list_friends_swipe_android_001");
 
-/** 滑动列表--话题详情页 */
-await listSwipeAction(operation[0], "topic", "up", 20);
-await operation[0].finishedCase("myplanet_list_topic_swipe_android_001");
-await operation[0].back();
+// /** 滑动列表--话题详情页 */
+// await listSwipeAction(operation[0], "topic", "up", 20);
+// await operation[0].finishedCase("myplanet_list_topic_swipe_android_001");
+// await operation[0].back();
 
 /** 滑动列表--推荐流 */
 await listSwipeAction(operation[0], "foryou", "up", 20);

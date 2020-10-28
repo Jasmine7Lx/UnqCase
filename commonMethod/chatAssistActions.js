@@ -18,11 +18,18 @@ const {
  * @param {*} name 聊天对象的姓名
  */
 async function enterTargetChatView(op, name) {
-    await op.imgTap({ imgName: 'scriptImg_1594808526009' });
+    let searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0.7, 1, 0.8, 1);
+    let searchBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1603080399491', searchSpace);
+    if (searchBtn.element == null) {
+        await op.back();
+        searchBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1603080399491', searchSpace);
+    }
+    await press(op, searchBtn);
     let input = await op.driver.element('id', 'com.imo.android.imoimalpha:id/custom_search_view');
     await input.type(name);
     let result = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/show');
     await result.element.click();
+    await op.stepTag('已进入：' + name + ' 相关界面');
 }
 
 /** =============================================================== */
@@ -69,10 +76,10 @@ async function sendAudioMsgAction(op, duration, needToAcceptPermission) {
     let audioBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1600676615756', searchSpace);
     /** 操作 */
     /** 如果需要允许权限，则轻按2秒，导出权限弹窗 */
-    if (!isNaN(needToAcceptPermission) && needToAcceptPermission == true) {
-        await press(op, audioBtn, 2);
-        await op.permissionAllow();
-    }
+    // if (!isNaN(needToAcceptPermission) && needToAcceptPermission == true) {
+    //     await press(op, audioBtn, 2);
+    //     await op.permissionAllow();
+    // }
 
     /** 发送语音消息 */
     await press(op, audioBtn, duration);
@@ -116,12 +123,13 @@ async function sendStickerMsgAction(op, stickerTypeIndex, stickerIndex, imgName)
     /** 操作 */
     let operatorElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/control_view');
     operatorElement.space.height = parseInt(op.windowSize.height) - parseInt(operatorElement.space.leftTopY);
-    let openningStickerFlag = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595255428474', operatorElement);
-    let closingStickerFlag = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595054863285', operatorElement);
-    if (openningStickerFlag.element == null) {
+    // let openningStickerFlag = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595255428474', operatorElement);
+    let closingStickerFlag = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/chat_sticker', operatorElement);
+    let stickertype = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/stickers_icn_wrapper', null, stickerTypeIndex);
+    if (stickertype.element == null) {
         await press(op, closingStickerFlag);
     }
-    let stickertype = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/stickers_icn_wrapper', null, stickerTypeIndex);
+    stickertype = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/stickers_icn_wrapper', null, stickerTypeIndex);
     await press(op, stickertype);
     let sticker = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/sticker_image_view', null, stickerIndex);
     await press(op, sticker);
@@ -146,7 +154,7 @@ async function sendAlbumMsgAction(op, resourceIndex, imgName) {
     /** 操作 */
     operatorElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/control_view');
     operatorElement.space.height = parseInt(op.windowSize.height) - parseInt(operatorElement.space.leftTopY);
-    albumEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595298753338', operatorElement);
+    albumEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1602667640252', operatorElement);
     await press(op, albumEntrance);
 
     /** 进入相册文件夹 */
@@ -158,13 +166,65 @@ async function sendAlbumMsgAction(op, resourceIndex, imgName) {
     await swipeAction(op, 'up');
 
     /** 选择资源 */
-    photoElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/phone_gallery_check', null, resourceIndex);
-    await press(op, photoElement);
+    if (resourceIndex instanceof Array) {
+        for (let index = 0; index < resourceIndex.length; index++) {
+            photoElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/phone_gallery_check', null, resourceIndex[index]);
+            await press(op, photoElement);
+        }
+    } else {
+        photoElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/phone_gallery_check', null, resourceIndex);
+        await press(op, photoElement);
+    }
     /** 发送 */
     await op.imgTap({ imgName: 'scriptImg_1598602107974' });
 
     /** 装备msgObj */
     msgObj.imgName = imgName;
+    msgObj.time = await getTime();
+    return msgObj;
+}
+
+/**
+ * 发生现拍的图片/视频
+ * @param {*} op 操作的设备
+ * @param {*} msgType 现拍消息的类型：photo | video | loopVideo
+ */
+async function sendCameraMsgAction(op, msgType) {
+    let targetObj, assistObj, searchSpace;
+    /** 初始化msgObj */
+    let msgObj = new Object();
+    /** 操作 */
+    assistObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/control_view');
+    assistObj.space.height = parseInt(op.windowSize.height) - parseInt(assistObj.space.leftTopY);
+    targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1603878357700', assistObj);
+    await press(op, targetObj);
+
+    /** 找到Camera按钮 */
+    searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0.7, 1);
+    targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1600160750388', searchSpace);
+
+    /** 根据msgType来判断发送类型 */
+    switch (msgType) {
+        case 'photo':
+            {
+                await press(op, targetObj);
+            }
+            break;
+        case 'video':
+            await press(op, targetObj, 10);
+            break;
+        case 'loopVideo':
+            {
+                assistObj = targetObj = await findAndInitSelfElementObj(op, 'unq|true', 'scriptImg_1603878744838', searchSpace);
+                await press(op, assistObj);
+                await press(op, targetObj, 5);
+            }
+            break;
+    }
+    /** 发送 */
+    await op.imgTap({ imgName: 'scriptImg_1598602107974' });
+
+    /** 装备msgObj */
     msgObj.time = await getTime();
     return msgObj;
 }
@@ -208,7 +268,7 @@ async function sendFileMsgAction(op, fileType, imgName) {
             {
                 await op.imgTap({ imgName: 'scriptImg_1598603705054' });
                 searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0, 0.3);
-                operatorElement = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598586009529', searchSpace);
+                operatorElement = await findAndInitSelfElementObj(op, 'unq|true', 'scriptImg_1598586009529', searchSpace);
                 await press(op, operatorElement);
             }
             break;
@@ -287,7 +347,8 @@ async function deleteMsgAction(op) {
     await op.imgTap({ imgName: 'scriptImg_1597397967493' });
 
     /** 在弹起的确认删除弹窗，中点击确认 */
-    let hintObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598452878464');
+    // let hintObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598452878464');
+    let hintObj = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0.5, 1, 0.4, 0.7);
     let acceptObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1594992170430', hintObj);
     await press(op, acceptObj);
 }
@@ -404,9 +465,15 @@ async function shareAction(op, target, imgName) {
     await searchEditor.element.type(target);
 
     /** 勾选 */
-    await op.imgTap({ imgName: 'scriptImg_1598449840650' });
+    // await op.imgTap({ imgName: 'scriptImg_1598449840650' });
+    let selectBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598449840650');
+    await press(op, selectBtn);
     /** 发送 */
-    await op.imgTap({ imgName: 'scriptImg_1598449875757' });
+    let sendBtn1 = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598449875757');
+    if (sendBtn1.element == null) {
+        sendBtn1 = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1602814020383');
+    }
+    await press(op, sendBtn1);
 
     /** 装备msgObj */
     msgObj.target = target;
@@ -469,8 +536,8 @@ async function awakeOperationView(op) {
     let msgReply = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/ml_content_wrapper', null, -1);
 
     /** 长按3秒，唤出操作弹窗 */
-    await pressByCoordinate(op, msgReply.space.centerX + msgReply.space.width / 4, msgReply.space.centerY, 3);
-
+    //  await pressByCoordinate(op, msgReply.space.centerX + msgReply.space.width / 4, msgReply.space.centerY, 3);
+    await press(op, msgReply, 3);
     /** 获取弹窗对象 */
     let operatorView = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/lv');
     return operatorView;
@@ -494,12 +561,20 @@ async function checkTextMsgAction(hostOp, guestOp, msgObj) {
     targetMsg = await findAndInitSelfElementObj(hostOp, 'appium|id', 'com.imo.android.imoimalpha:id/ml_content_wrapper', null, -1);
 
     /** 1、检查字符串是否相等 */
-    msgText = await targetMsg.element.element('id', 'com.imo.android.imoimalpha:id/tv_message');
-    await assertMsgText(hostOp, await msgText.text(), msgObj.text);
+    msgText = await findAndInitSelfElementObj(hostOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/tv_message', targetMsg);
+    if (msgText.element == null) {
+        await hostOp.stepTag('主设备-没有找到消息文本');
+    } else {
+        await assertMsgText(hostOp, await msgText.element.text(), msgObj.text);
+    }
 
     /** 2、检查时间是否相等 */
-    msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-    await assertMsgTime(hostOp, await msgTime.text(), msgObj.time);
+    msgTime = await findAndInitSelfElementObj(hostOp, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+    if (msgTime.element == null) {
+        await hostOp.stepTag('副设备-没有找到消息发送时间');
+    } else {
+        await assertMsgTime(hostOp, await msgTime.element.text(), msgObj.time);
+    }
 
     /** 3、检查是否存在msg status */
     await assertStutas(hostOp, targetMsg);
@@ -510,12 +585,20 @@ async function checkTextMsgAction(hostOp, guestOp, msgObj) {
     targetMsg = await findAndInitSelfElementObj(guestOp, 'appium|id', 'com.imo.android.imoimalpha:id/ml_content_wrapper', null, -1);
 
     /** 1、检查字符串是否相等 */
-    msgText = await targetMsg.element.element('id', 'com.imo.android.imoimalpha:id/tv_message');
-    await assertMsgText(guestOp, await msgText.text(), msgObj.text);
+    msgText = await findAndInitSelfElementObj(guestOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/tv_message', targetMsg);
+    if (msgText.element == null) {
+        await guestOp.stepTag('副设备-没有找到消息文本');
+    } else {
+        await assertMsgText(guestOp, await msgText.element.text(), msgObj.text);
+    }
 
     /** 2、检查时间是否相等 */
-    msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-    await assertMsgTime(guestOp, await msgTime.text(), msgObj.time);
+    msgTime = await findAndInitSelfElementObj(guestOp, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+    if (msgTime.element == null) {
+        await guestOp.stepTag('副设备-没有找到消息发送时间');
+    } else {
+        await assertMsgTime(guestOp, await msgTime.element.text(), msgObj.time);
+    }
 }
 
 /**
@@ -531,11 +614,19 @@ async function checkAudioMsgAction(hostOp, guestOp, msgObj) {
     await swipeAction(hostOp, 'up');
     targetMsg = await findAndInitSelfElementObj(hostOp, 'appium|id', 'com.imo.android.imoimalpha:id/ml_content_wrapper', null, -1);
     /** 1、检查时长 */
-    msgDuration = await targetMsg.element.element('id', 'com.imo.android.imoimalpha:id/tv_duration');
-    await assertMsgText(hostOp, await msgDuration.text(), msgObj.duration);
+    msgDuration = await findAndInitSelfElementObj(hostOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/tv_duration', targetMsg);
+    if (msgDuration.element == null) {
+        await hostOp.stepTag('主设备-没有找到音频时间文本');
+    } else {
+        await assertMsgText(hostOp, await msgDuration.element.text(), msgObj.duration);
+    }
     /** 2、检查发送时间 */
-    msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-    await assertMsgTime(hostOp, await msgTime.text(), msgObj.time);
+    msgTime = await findAndInitSelfElementObj(hostOp, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+    if (msgTime.element == null) {
+        await hostOp.stepTag('主设备-找不到时间元素！');
+    } else {
+        await assertMsgTime(hostOp, await msgTime.element.text(), msgObj.time);
+    }
     /** 3、检查状态 */
     await assertStutas(hostOp, targetMsg);
 
@@ -544,12 +635,20 @@ async function checkAudioMsgAction(hostOp, guestOp, msgObj) {
     await swipeAction(guestOp, 'up');
     targetMsg = await findAndInitSelfElementObj(guestOp, 'appium|id', 'com.imo.android.imoimalpha:id/ml_content_wrapper', null, -1);
     /** 1、检查时长 */
-    msgDuration = await targetMsg.element.element('id', 'com.imo.android.imoimalpha:id/tv_duration');
-    await assertMsgText(guestOp, await msgDuration.text(), msgObj.duration);
+    msgDuration = await findAndInitSelfElementObj(guestOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/tv_duration', targetMsg);
+    if (msgDuration.element == null) {
+        await guestOp.stepTag('副设备-没有找到音频时间文本');
+    } else {
+        await assertMsgText(guestOp, await msgDuration.element.text(), msgObj.duration);
+    }
 
     /** 2、检查发送时间 */
-    msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-    await assertMsgTime(guestOp, await msgTime.text(), msgObj.time);
+    msgTime = await findAndInitSelfElementObj(guestOp, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+    if (msgTime.element == null) {
+        await guestOp.stepTag('副设备-找不到时间元素！');
+    } else {
+        await assertMsgTime(guestOp, await msgTime.element.text(), msgObj.time);
+    }
 }
 
 /**
@@ -570,8 +669,12 @@ async function checkImgMsgAction(hostOp, guestOp, msgObj) {
         await hostOp.stepTag('主设备-img 元素找不到 ');
     }
     /** 2、检查发送时间 */
-    msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-    await assertMsgTime(hostOp, await msgTime.text(), msgObj.time);
+    msgTime = await findAndInitSelfElementObj(hostOp, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+    if (msgTime.element == null) {
+        await hostOp.stepTag('主设备-没有找到消息发送时间');
+    } else {
+        await assertMsgTime(hostOp, await msgTime.element.text(), msgObj.time);
+    }
     /** 3、检查状态 */
     await assertStutas(hostOp, targetMsg);
 
@@ -586,8 +689,12 @@ async function checkImgMsgAction(hostOp, guestOp, msgObj) {
     }
 
     /** 2、检查发送时间 */
-    msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-    await assertMsgTime(guestOp, await msgTime.text(), msgObj.time);
+    msgTime = await findAndInitSelfElementObj(guestOp, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+    if (msgTime.element == null) {
+        await guestOp.stepTag('副设备-没有找到消息发送时间');
+    } else {
+        await assertMsgTime(guestOp, await msgTime.element.text(), msgObj.time);
+    }
 }
 
 /**
@@ -646,11 +753,15 @@ async function checkShareAction(op, msgObj, backName) {
         /** 1、检查发送的内容 */
         msgImg = await findAndInitSelfElementObj(op, 'unq|', msgObj.imgName, targetMsg);
         if (msgImg.element == null) {
-            await hostOp.stepTag('主设备-分享的img 元素找不到 ');
+            await op.stepTag('主设备-分享的img 元素找不到 ');
         }
         /** 2、检查发送时间 */
-        msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-        await assertMsgTime(op, await msgTime.text(), msgObj.time);
+        msgTime = await findAndInitSelfElementObj(op, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+        if (msgTime.element == null) {
+            await op.stepTag('主设备-没有找到发送时间文本');
+        } else {
+            await assertMsgTime(op, await msgTime.element.text(), msgObj.time);
+        }
         /** 3、检查状态 */
         await assertStutas(op, targetMsg);
     } else {
@@ -660,12 +771,20 @@ async function checkShareAction(op, msgObj, backName) {
         targetMsg = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/ml_content_wrapper', null, -1);
 
         /** 1、检查字符串是否相等 */
-        msgText = await targetMsg.element.element('id', 'com.imo.android.imoimalpha:id/tv_message');
-        await assertMsgText(op, await msgText.text(), msgObj.imgName);
+        msgText = await findAndInitSelfElementObj(op, 'appiumParent|id', 'com.imo.android.imoimalpha:id/tv_message', targetMsg);
+        if (msgText.element == null) {
+            await op.stepTag('主设备-没有找到消息文本');
+        } else {
+            await assertMsgText(op, await msgText.element.text(), msgObj.text);
+        }
 
         /** 2、检查时间是否相等 */
-        msgTime = await targetMsg.element.element('xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date_inside') or contains(@resource-id,'imkit_date_outside')]");
-        await assertMsgTime(op, await msgTime.text(), msgObj.time);
+        msgTime = await findAndInitSelfElementObj(op, 'appiumParent|xpath', "//android.widget.TextView[contains(@resource-id,'imkit_date')]", targetMsg);
+        if (msgTime.element == null) {
+            await op.stepTag('主设备-没有找到发送时间文本');
+        } else {
+            await assertMsgTime(op, await msgTime.element.text(), msgObj.time);
+        }
 
         /** 3、检查是否存在msg status */
         await assertStutas(op, targetMsg);
@@ -702,16 +821,14 @@ async function checkDeleteAction(hostOp, guestOp) {
  */
 async function checkFileDownLoad(op, fileType) {
     let numObj, num, operatorElement, clipBtn, fileEntrance, assistElement, numStr;
-    /** 如果没有找到文件入口，则点曲别针 */
-    operatorElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/menu_panel');
-    if (operatorElement.element == null) {
-        /** 点击曲别针 */
-        assistElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/control_view');
-        assistElement.space.height = parseInt(op.windowSize.height) - parseInt(assistElement.space.leftTopY);
-        clipBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598431132748', assistElement);
+    /** 根据曲别针的坐标，来判断是否打开了操作栏，没有则点曲别针 */
+    assistElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/control_view');
+    assistElement.space.height = parseInt(op.windowSize.height) - parseInt(assistElement.space.leftTopY);
+    clipBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598431132748', assistElement);
+    if (clipBtn.space.centerY > (op.windowSize.height * 4) / 5) {
         await press(op, clipBtn);
-        operatorElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/menu_panel');
     }
+    operatorElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/menu_panel');
     /** 进入文件界面 */
     fileEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598434609602', operatorElement);
     await press(op, fileEntrance);
@@ -756,7 +873,7 @@ async function checkImageDowload(op) {
     /** 进入相册界面 */
     operatorElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/control_view');
     operatorElement.space.height = parseInt(op.windowSize.height) - parseInt(operatorElement.space.leftTopY);
-    albumEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595298753338', operatorElement);
+    albumEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1602667640252', operatorElement);
     await press(op, albumEntrance);
 
     /** 进入相册文件夹 */
@@ -764,7 +881,11 @@ async function checkImageDowload(op) {
 
     /** 获取IMO文件夹的数量 */
     numObj = await findAndInitSelfElementObj(op, 'appium|xpath', "//android.widget.TextView[@text='imo']/following-sibling::android.widget.TextView");
-    num = await numObj.element.text();
+    if (numObj.element == null) {
+        num = 0;
+    } else {
+        num = await numObj.element.text();
+    }
     await op.back();
     await op.back();
     return num;
@@ -779,50 +900,101 @@ async function assertStutas(op, targetMsg) {
     let msgStatus = await findAndInitSelfElementObj(
         op,
         'appiumParent|xpath',
-        "//android.widget.ImageView[contains(@resource-id,'imkit_msg_state_') or contains(@resource-id,'com.imo.android.imoimalpha:id/iv_file_status')]",
+        "//android.widget.ImageView[contains(@resource-id,'iv_mes_state') or contains(@resource-id,'com.imo.android.imoimalpha:id/iv_file_status') or contains(@resource-id,'imkit_msg_state_') or contains(@resource-id,'com.imo.android.imoimalpha:id/iv_file_status')]",
         targetMsg
     );
     if (msgStatus.element == null) {
         await op.stepTag('该消息没有找到status');
+    } else {
+        await op.stepTag('主设备-检查消息状态成功！');
     }
 }
 
 /**
  * 准备聊天时要使用到的资源，目前会下载内容（图片、视频、文档、音频）到/sdcard/DCMI/Camera文件夹下
  * @param {*} hostOp 被操作的设备
+ * @param {*} resourceName 所需资源名：image | video | audio | document
  */
-async function chatResourcesPreparation(hostOp) {
+async function chatResourcesPreparation(hostOp, resourceName) {
     /** 清理手机内容 */
     await hostOp.removeMedias();
 
-    /** 下载 - 图片资源*/
-    await hostOp.addMediasWithUrls([
-        {
-            url: 'http://172.24.81.55/Imo/AutoResources/Img/autoTest-1.png',
-            count: 1,
-        },
-    ]);
-    /** 下载 - 视频资源 */
-    await hostOp.addMediasWithUrls([
-        {
-            url: 'http://172.24.81.55/Imo/AutoResources/video/autoTest-1.mp4',
-            count: 1,
-        },
-    ]);
-    /** 下载 - 音频资源 */
-    await hostOp.addMediasWithUrls([
-        {
-            url: 'http://172.24.81.55/Imo/AutoResources/Audio/autoTest-1.mp3',
-            count: 1,
-        },
-    ]);
-    /** 下载 - 文档资源 */
-    await hostOp.addMediasWithUrls([
-        {
-            url: 'http://172.24.81.55/Imo/AutoResources/file/autoTest-1.pdf',
-            count: 1,
-        },
-    ]);
+    switch (resourceName) {
+        case 'image':
+            {
+                /** 下载 - 图片资源*/
+                await hostOp.addMediasWithUrls([
+                    {
+                        url: 'http://172.24.81.55/Imo/AutoResources/Img/autoTest-1.png',
+                        count: 1,
+                    },
+                ]);
+            }
+            break;
+        case 'video':
+            {
+                /** 下载 - 视频资源 */
+                await hostOp.addMediasWithUrls([
+                    {
+                        url: 'http://172.24.81.55/Imo/AutoResources/video/autoTest-1.mp4',
+                        count: 1,
+                    },
+                ]);
+            }
+            break;
+        case 'audio':
+            {
+                /** 下载 - 音频资源 */
+                await hostOp.addMediasWithUrls([
+                    {
+                        url: 'http://172.24.81.55/Imo/AutoResources/Audio/autoTest-1.mp3',
+                        count: 1,
+                    },
+                ]);
+            }
+            break;
+        case 'document':
+            {
+                /** 下载 - 文档资源 */
+                await hostOp.addMediasWithUrls([
+                    {
+                        url: 'http://172.24.81.55/Imo/AutoResources/file/autoTest-1.pdf',
+                        count: 1,
+                    },
+                ]);
+            }
+            break;
+        default: {
+            /** 下载 - 图片资源*/
+            await hostOp.addMediasWithUrls([
+                {
+                    url: 'http://172.24.81.55/Imo/AutoResources/Img/autoTest-1.png',
+                    count: 1,
+                },
+            ]);
+            /** 下载 - 视频资源 */
+            await hostOp.addMediasWithUrls([
+                {
+                    url: 'http://172.24.81.55/Imo/AutoResources/video/autoTest-1.mp4',
+                    count: 1,
+                },
+            ]);
+            /** 下载 - 音频资源 */
+            await hostOp.addMediasWithUrls([
+                {
+                    url: 'http://172.24.81.55/Imo/AutoResources/Audio/autoTest-1.mp3',
+                    count: 1,
+                },
+            ]);
+            /** 下载 - 文档资源 */
+            await hostOp.addMediasWithUrls([
+                {
+                    url: 'http://172.24.81.55/Imo/AutoResources/file/autoTest-1.pdf',
+                    count: 1,
+                },
+            ]);
+        }
+    }
 }
 
 module.exports = {
@@ -832,6 +1004,7 @@ module.exports = {
     sendLinkMsgAction,
     sendStickerMsgAction,
     sendAlbumMsgAction,
+    sendCameraMsgAction,
     sendFileMsgAction,
     replyMsgAction,
     shareMsgAction,

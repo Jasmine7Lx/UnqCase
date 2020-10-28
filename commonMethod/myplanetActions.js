@@ -106,7 +106,7 @@ async function followListSwipeAction(op, listType) {
             );
             await followingTab.click();
             if (unfollowButton != null) {
-                await swipeTimesAction(op, "up", 20);
+                await swipeTimesAction(op, "up", 15);
             } else {
                 await op.stepTag("关注列表数据不存在");
             }
@@ -118,7 +118,7 @@ async function followListSwipeAction(op, listType) {
               );
             await followersTab.click();
             if (followButton != null) {
-                await swipeTimesAction(op, "up", 20);
+                await swipeTimesAction(op, "up", 15);
             } else {
                 await op.stepTag("粉丝列表数据不存在");
             }
@@ -130,7 +130,7 @@ async function followListSwipeAction(op, listType) {
               );
             await recommendTab.click();
             if (followButton != null) {
-                await swipeTimesAction(op, "up", 20);
+                await swipeTimesAction(op, "up", 15);
             } else {
                 await op.stepTag("推荐列表数据不存在");
             }
@@ -138,7 +138,17 @@ async function followListSwipeAction(op, listType) {
     }
 }
 
+/** =========================================================================== */
+/** ================================ 发布帖子 ================================== */
+/** =========================================================================== */
+async function publishPostAction(op, postType) {
+    
+}
 
+
+/** =========================================================================== */
+/** ================================ 帖子发布检查 ================================== */
+/** =========================================================================== */
 
 
 

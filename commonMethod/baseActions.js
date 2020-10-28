@@ -22,7 +22,7 @@ async function splitAndGetSearchSpace(oringnalSpace, startW, endW, startH, endH)
 /**
  * 初始化自定义的对象，用于测试
  * @param {*} op 操作的设备
- * @param {*} findWay 查找方法，支持以下类型：'unq|'、'appium|way（id，xpath等）'、'appiumParent|way（id，xpath等）'
+ * @param {*} findWay 查找方法，支持以下类型：'unq|'（unq识别）、'unq|true'（去背景识别）、'unqFast|'（指定识别时间）、'unqFast|true'（指定识别时间并去背景识别）、'appium|way（id，xpath等）'、'appiumParent|way（id，xpath等）'
  * @param {*} identification 查找的元素标识
  * @param {*} parentObj 上级元素的Obj，用于界定查找范围；如果是unq查找的话，可以直接传入space 的Obj
  * @param {*} index 当界面的元素为多个时，需要填写需要返回数组中第几个元素（0开始计数）；默认是返回第一个，如果想返回最后一个，请填入-1
@@ -42,7 +42,7 @@ async function findAndInitSelfElementObj(op, findWay, identification, parentObj,
     }
 
     /** 初始化selfObj的属性 */
-    selfObj.desc = way[0];
+    selfObj.desc = findWay;
     selfObj.element = null;
     selfObj.space = null;
     selfObj.inWindowLocation = null;
@@ -53,6 +53,10 @@ async function findAndInitSelfElementObj(op, findWay, identification, parentObj,
         switch (way[0]) {
             case 'unq':
                 {
+                    let removeBackground = false;
+                    if (way[1] == 'true') {
+                        removeBackground = true;
+                    }
                     if (parentObj == undefined) {
                         parentSpace = await getSpace(op, 'window');
                     } else if (parentObj.space == undefined || parentObj.space == null) {
@@ -66,11 +70,36 @@ async function findAndInitSelfElementObj(op, findWay, identification, parentObj,
                         assignY: parentSpace.leftTopY,
                         assignWidth: parentSpace.width,
                         assignHeight: parentSpace.height,
+                        isRemoveBackgroundRecognize: removeBackground,
                     });
                     targetSpace = await getSpace(op, 'unq', targetElement);
                     selfObj.size = 1;
                 }
                 break;
+            case 'unqFast': {
+                let removeBackground = false;
+                if (way[1] == 'true') {
+                    removeBackground = true;
+                }
+                if (parentObj == undefined) {
+                    parentSpace = await getSpace(op, 'window');
+                } else if (parentObj.space == undefined || parentObj.space == null) {
+                    parentSpace = parentObj;
+                } else {
+                    parentSpace = parentObj.space;
+                }
+                targetElement = await op.imgRecognize({
+                    imgName: identification,
+                    assignX: parentSpace.leftTopX,
+                    assignY: parentSpace.leftTopY,
+                    assignWidth: parentSpace.width,
+                    assignHeight: parentSpace.height,
+                    isRemoveBackgroundRecognize: removeBackground,
+                    recognizeTimeout: 5000,
+                });
+                targetSpace = await getSpace(op, 'unq', targetElement);
+                selfObj.size = 1;
+            }
             case 'appium':
                 {
                     await op.driver.setImplicitWaitTimeout(3000);
@@ -106,6 +135,7 @@ async function findAndInitSelfElementObj(op, findWay, identification, parentObj,
         selfObj.space = targetSpace;
         selfObj.inWindowLocation = getWindowLocation(op, targetSpace);
     } catch (err) {
+        op.stepTag('可能元素找不到 : ' + identification);
         op.stepTag('此处出现异常 : ' + err);
     }
 
@@ -132,12 +162,12 @@ async function getWindowLocation(op, elementSpace) {
 /**
  * 根据传入的direction 进行相应的操作（上滑、下滑、左滑、右滑）
  * @param {*} op 操作的设备
- * @param {} direction 滑动方向字符串，必填项 up｜dowm｜left｜right
+ * @param {} direction 滑动方向字符串，必填项 up｜down｜left｜right
  * @param {*} space 滑动动作区域
  */
 async function swipeAction(op, direction, space) {
     let selfSpace;
-    if (isNaN(space)) {
+    if (space == undefined) {
         selfSpace = await getSpace(op, 'window');
     } else {
         selfSpace = space;
@@ -146,40 +176,40 @@ async function swipeAction(op, direction, space) {
         case 'up':
             {
                 await op.commonSwipe({
-                    startX: selfSpace.width / 2,
-                    startY: (selfSpace.height / 3) * 2,
-                    endX: selfSpace.width / 2,
-                    endY: selfSpace.height / 3,
+                    startX: selfSpace.width / 2 + selfSpace.leftTopX,
+                    startY: (selfSpace.height / 3) * 2 + selfSpace.leftTopY,
+                    endX: selfSpace.width / 2 + selfSpace.leftTopX,
+                    endY: selfSpace.height / 3 + selfSpace.leftTopY,
                 });
             }
             break;
-        case 'up':
+        case 'down':
             {
                 await op.commonSwipe({
-                    startX: selfSpace.width / 2,
-                    startY: (selfSpace.height / 3) * 2,
-                    endX: selfSpace.width / 2,
-                    endY: selfSpace.height / 3,
+                    startX: selfSpace.width / 2 + selfSpace.leftTopX,
+                    startY: selfSpace.height / 3 + selfSpace.leftTopY,
+                    endX: selfSpace.width / 2 + selfSpace.leftTopX,
+                    endY: (selfSpace.height / 3) * 2 + selfSpace.leftTopY,
                 });
             }
             break;
-        case 'up':
+        case 'left':
             {
                 await op.commonSwipe({
-                    startX: selfSpace.width / 2,
-                    startY: (selfSpace.height / 3) * 2,
-                    endX: selfSpace.width / 2,
-                    endY: selfSpace.height / 3,
+                    startX: (selfSpace.width / 5) * 4 + selfSpace.leftTopX,
+                    startY: selfSpace.height / 2 + selfSpace.leftTopY,
+                    endX: selfSpace.width / 5 + selfSpace.leftTopX,
+                    endY: selfSpace.height / 2 + selfSpace.leftTopY,
                 });
             }
             break;
-        case 'up':
+        case 'right':
             {
                 await op.commonSwipe({
-                    startX: selfSpace.width / 2,
-                    startY: (selfSpace.height / 3) * 2,
-                    endX: selfSpace.width / 2,
-                    endY: selfSpace.height / 3,
+                    startX: selfSpace.width / 5 + selfSpace.leftTopX,
+                    startY: selfSpace.height / 2 + selfSpace.leftTopY,
+                    endX: (selfSpace.width / 5) * 4 + selfSpace.leftTopX,
+                    endY: selfSpace.height / 2 + selfSpace.leftTopY,
                 });
             }
             break;
@@ -369,6 +399,11 @@ async function getInputString(strType, strLength) {
         case 'IN':
             while (result.length < strLength) {
                 result = result + (await getChar('\u0900', '\u097f'));
+            }
+            return result;
+        case 'RU':
+            while (result.length < strLength) {
+                result = result + (await getChar('\u0400', '\u052f'));
             }
             return result;
         case 'specialCode':

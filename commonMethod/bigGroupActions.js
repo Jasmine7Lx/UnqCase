@@ -12,7 +12,7 @@ const {
     getTime,
 } = require('../commonMethod/baseActions');
 
-const { shareAction } = require('../commonMethod/chatAssistActions');
+const { shareAction, enterTargetChatView } = require('../commonMethod/chatAssistActions');
 
 /**
  * 关闭刚进大群时，那个弹窗
@@ -23,6 +23,16 @@ async function closeBigGroupPopWindow(op) {
     let closeBtn = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/close_rank_iv');
     if (closeBtn.element != null) {
         await closeBtn.element.click();
+    }
+    await sleepAction(3000);
+    /** 关闭推荐gif */
+    if (
+        await op.imgExist({
+            imgName: 'scriptImg_1603203285408',
+            recognizeTimeout: 2000,
+        })
+    ) {
+        await op.driver.element('id', 'com.imo.android.imoimalpha:id/chat_input').click();
     }
 }
 
@@ -45,7 +55,7 @@ async function sendBGTextMsgAction(op, textType, textLength) {
     let textStr = await getInputString(textType, textLength);
     await op.driver.element('id', 'com.imo.android.imoimalpha:id/chat_input').click();
     await op.driver.element('id', 'com.imo.android.imoimalpha:id/chat_input').type(textStr);
-    await op.imgTap({ imgName: 'scriptImg_1593770843156' });
+    await op.imgTap({ imgName: 'scriptImg_1601362853308' });
     /** 装备msgObj */
     msgObj.text = textStr;
     return msgObj;
@@ -63,13 +73,13 @@ async function sendBGAudioMsgAction(op, duration, needToAcceptPermission) {
     /** 初始化msgObj */
     let msgObj = new Object();
 
-    let audioBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595297983863');
+    let audioBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1601373798290');
     /** 操作 */
     /** 如果需要允许权限，则轻按2秒，导出权限弹窗 */
-    if (!isNaN(needToAcceptPermission)) {
-        await press(op, audioBtn, 2);
-        await op.permissionAllow();
-    }
+    // if (!isNaN(needToAcceptPermission)) {
+    //     await press(op, audioBtn, 2);
+    //     await op.permissionAllow();
+    // }
 
     /** 发送语音消息 */
     await press(op, audioBtn, duration);
@@ -93,7 +103,7 @@ async function sendBGLinkMsgAction(op, linkStr, imgName) {
     /** 操作 */
     await op.driver.element('id', 'com.imo.android.imoimalpha:id/chat_input').click();
     await op.driver.element('id', 'com.imo.android.imoimalpha:id/chat_input').type(linkStr);
-    await op.imgTap({ imgName: 'scriptImg_1593770843156' });
+    await op.imgTap({ imgName: 'scriptImg_1601362853308' });
 
     /** 装备msgObj */
     msgObj.imgName = imgName;
@@ -114,13 +124,15 @@ async function sendBGStickerMsgAction(op, stickerTypeIndex, stickerIndex, imgNam
     let msgObj = new Object();
     /** 操作 */
     let operatorElement = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/rv_record');
-    let openningStickerFlag = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595255428474', operatorElement);
-    let clisingStickerFlag = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595234320193', operatorElement);
-    if (openningStickerFlag.element == null) {
-        await press(op, clisingStickerFlag);
-    }
+    // let openningStickerFlag = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595255428474', operatorElement);
+    let closingStickerFlag = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/iv_show_stickers', operatorElement);
     /** 选择Sticker表情的类型 */
     let stickertype = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/stickers_icn_wrapper', null, stickerTypeIndex);
+    if (stickertype.element == null) {
+        await press(op, closingStickerFlag);
+    }
+    /** 选择Sticker表情的类型 */
+    stickertype = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/stickers_icn_wrapper', null, stickerTypeIndex);
     await press(op, stickertype);
     /** 选择Sticker表情 */
     let sticker = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/sticker_image_view', null, stickerIndex);
@@ -186,13 +198,20 @@ async function sendBGFileMsgAction(op, fileType, imgName) {
         case 'audio':
             {
                 await op.imgTap({ imgName: 'scriptImg_1598603538127' });
-                await op.imgTap({ imgName: 'scriptImg_1598585999641' });
+                searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0, 0.3);
+                operatorElement = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1600865090274', searchSpace);
+                await press(op, operatorElement);
+                // await op.imgTap({ imgName: 'scriptImg_1598585999641' });
             }
             break;
         case 'file':
             {
+                // await op.imgTap({ imgName: 'scriptImg_1601458737246' });
+                // await op.imgTap({ imgName: 'scriptImg_1598586009529' });
                 await op.imgTap({ imgName: 'scriptImg_1598603705054' });
-                await op.imgTap({ imgName: 'scriptImg_1598586009529' });
+                searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0, 0.3);
+                operatorElement = await findAndInitSelfElementObj(op, 'unq|true', 'scriptImg_1598586009529', searchSpace);
+                await press(op, operatorElement);
             }
             break;
     }
@@ -247,7 +266,6 @@ async function shareBGMsgAction(op, target, imgName) {
 
     /** 分享 */
     let msgObj = await shareAction(op, target, imgName);
-    await op.back();
     return msgObj;
 }
 
@@ -257,9 +275,10 @@ async function shareBGMsgAction(op, target, imgName) {
  * @param {*} downLoadType 需要下载的文件类型：img|video|audio|file
  */
 async function downloadBGMsgAction(op, downLoadType) {
-    let startNum, endNum, dowloadBtn, operatorView;
+    let startNum, endNum, downloadBtn, operatorView;
+    let downloadTimes = 0;
     /** 上滑 */
-    await swipeAction(hostOp, 'up', await getSpace(hostOp, 'window'));
+    // await swipeAction(op, 'up', await getSpace(op, 'window'));
 
     switch (downLoadType) {
         case 'img':
@@ -270,7 +289,7 @@ async function downloadBGMsgAction(op, downLoadType) {
                 operatorView = await awakeOperationView(op);
                 /** 点击下载 */
                 downloadBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598599499458', operatorView);
-                await press(op, dowloadBtn);
+                await press(op, downloadBtn);
                 /** 获取下载后的资源数量 */
                 endNum = await checkBGImageDowload(op);
             }
@@ -283,7 +302,7 @@ async function downloadBGMsgAction(op, downLoadType) {
                 operatorView = await awakeOperationView(op);
                 /** 点击下载 */
                 downloadBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598599499458', operatorView);
-                await press(op, dowloadBtn);
+                await press(op, downloadBtn);
                 /** 获取下载后的资源数量 */
                 endNum = await checkBGFileDownLoad(op, 'video');
             }
@@ -293,7 +312,7 @@ async function downloadBGMsgAction(op, downLoadType) {
                 /** 获取起始资源数量 */
                 startNum = await checkBGFileDownLoad(op, 'audio');
                 /** 操作下载 */
-                await BGFileDownLoadAction(op);
+                downloadTimes = await BGFileDownLoadAction(op);
                 /** 获取下载后的资源数量 */
                 endNum = await checkBGFileDownLoad(op, 'audio');
             }
@@ -302,15 +321,15 @@ async function downloadBGMsgAction(op, downLoadType) {
             /** 获取起始资源数量 */
             startNum = await checkBGFileDownLoad(op, 'file');
             /** 操作下载 */
-            await BGFileDownLoadAction(op);
+            downloadTimes = await BGFileDownLoadAction(op);
             /** 获取下载后的资源数量 */
             endNum = await checkBGFileDownLoad(op, 'file');
         }
     }
 
     /** 检查 */
-    if (parseInt(endNum) - parseInt(startNum) != 1) {
-        await op.stepTag('下载失败，开始的时候，有 ' + startNum + ' 个document，结束的时候有 ' + endNum + ' 个document');
+    if (parseInt(endNum) - parseInt(startNum) != 1 + downloadTimes) {
+        await op.stepTag('下载失败，开始的时候，有 ' + startNum + ' 个资源，结束的时候有 ' + endNum + ' 个资源');
     }
 }
 
@@ -319,24 +338,31 @@ async function downloadBGMsgAction(op, downLoadType) {
  * @param {*} op 被操作的设备
  */
 async function BGFileDownLoadAction(op) {
-    let downLoadTarget, downloadingOjb;
+    let downLoadTarget, downloadingOjb, downloadBtn, downloadedBtn;
     /** 获取聊天界面最后一个聊天tab */
-    downLoadTarget = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/rv_record', null, -1);
+    downLoadTarget = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/x_item_content_view_root', null, -1);
     /** 点击进入文件详情页 */
-    await pressByCoordinate(op, msgReply.space.centerX + msgReply.space.width / 4, msgReply.space.centerY);
-    /** 点击下载 */
-    await op.imgTap({ imgName: 'scriptImg_1598453783204' });
-
-    /**获取下载状态 */
-    downloadingOjb = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598453674110');
-    /** 等待下载完成 */
-    while (documentObj.element != null) {
-        await sleepAction(5000);
-        documentObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598453674110');
+    await pressByCoordinate(op, downLoadTarget.space.centerX + downLoadTarget.space.width / 4, downLoadTarget.space.centerY);
+    /** 判断是否需要下载 */
+    downloadBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598453783204');
+    downloadedBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1600867906105');
+    if (downloadedBtn.element == null) {
+        await press(op, downloadBtn);
+        /**获取下载状态 */
+        downloadingOjb = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598453674110');
+        /** 等待下载完成 */
+        while (downloadingOjb.element != null) {
+            await sleepAction(5000);
+            downloadingOjb = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598453674110');
+        }
+        /** 返回聊天界面 */
+        await op.back();
+        return 0;
+    } else {
+        /** 返回聊天界面 */
+        await op.back();
+        return -1;
     }
-
-    /** 返回聊天界面 */
-    await op.back();
 }
 
 /**
@@ -348,10 +374,10 @@ async function awakeOperationView(op) {
     /** 上滑 */
     await swipeAction(op, 'up');
     /** 获取聊天界面最后一个聊天tab */
-    let msgReply = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/rv_record', null, -1);
+    let msgReply = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/x_item_content_view_root', null, -1);
 
     /** 长按3秒，唤出操作弹窗 */
-    await pressByCoordinate(op, msgReply.space.centerX + msgReply.space.width / 4, msgReply.space.centerY, 3);
+    await press(op, msgReply, 3);
 
     /** 获取弹窗对象 */
     let operatorView = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/lv');
@@ -361,32 +387,53 @@ async function awakeOperationView(op) {
 /**
  * 进入到曲别针区域的特定功能界面
  * @param {*} op 被操作的设备
- * @param {*} clipType 曲别针区域的功能入口，目前支持：gallery|file
+ * @param {*} clipType 曲别针区域的功能入口，目前支持：gallery|file|voiceRoom
  */
 async function enterClipView(op, clipType) {
-    let controlView, clipBtn, galleryEntrance, fileEntrance, checkSpace;
+    let controlView, clipBtn, entrance, checkSpace;
     controlView = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/rv_record');
-    clipBtn = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598431132748', controlView);
+    controlView.space.height = parseInt(op.windowSize.height) - parseInt(controlView.space.leftTopY);
+    clipBtn = await findAndInitSelfElementObj(op, 'unq|true', 'scriptImg_1598431132748', controlView);
+
+    /** 根据曲别针的坐标来判断是否有打开操作区域 */
+    if (clipBtn.space.centerY > (op.windowSize.height * 4) / 5) {
+        await press(op, clipBtn);
+    }
 
     /** 在屏幕的下半区域查找是否有相册或者文件入口，没有就点击曲别针 */
     checkSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0.5, 1);
-    galleryEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595298753338', checkSpace);
-    if (galleryEntrance.element == null) {
-        await press(op, clipBtn);
-    }
+    // galleryEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595298753338', checkSpace);
+    // if (galleryEntrance.element == null) {
+    //     await press(op, clipBtn);
+    // }
 
     /** 进入到对应的界面 */
     switch (clipType) {
         case 'gallery':
             {
-                galleryEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595298753338', checkSpace);
-                await press(op, galleryEntrance);
+                entrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1595298753338', checkSpace);
+                /** 判断是否需要关闭弹出的图片预览 */
+                if (
+                    await op.imgExist({
+                        imgName: 'scriptImg_1603174825445',
+                        recognizeTimeout: 2000,
+                    })
+                ) {
+                    await press(op, entrance);
+                }
+                await press(op, entrance);
             }
             break;
         case 'file':
             {
-                fileEntrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598434609602', checkSpace);
-                await press(op, fileEntrance);
+                entrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1598434609602', checkSpace);
+                await press(op, entrance);
+            }
+            break;
+        case 'voiceRoom':
+            {
+                entrance = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1599884138877', checkSpace);
+                await press(op, entrance);
             }
             break;
     }
@@ -429,23 +476,25 @@ async function checkBGTextMsgAction(hostOp, guestOp, msgObj) {
  * @param {*} msgObj 发送消息的msgObj
  */
 async function checkBGAudioMsgAction(hostOp, guestOp, msgObj) {
-    let lastMsg, msgContent, msgStatus;
+    let lastMsg, msgContent;
 
     /** 主设备检查 */
+    await swipeAction(hostOp, 'up');
     /** 获取聊天界面上最后一个聊天信息 */
     lastMsg = await findAndInitSelfElementObj(hostOp, 'appium|id', 'com.imo.android.imoimalpha:id/x_item_content_view_root', null, -1);
-    /** 获取文本内容，并对比 */
+    /** 获取音频时长内容，并对比 */
     msgContent = await findAndInitSelfElementObj(hostOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/tv_duration', lastMsg);
-    await assertMsgTime(hostOp, await msgContent.element.text(), msgObj.text);
+    await assertMsgTime(hostOp, await msgContent.element.text(), msgObj.duration);
     /** 对比消息状态 */
     await assertStutas(hostOp, lastMsg);
 
     /** 副设备检查 */
     /** 获取聊天界面上最后一个聊天信息 */
+    await swipeAction(guestOp, 'up');
     lastMsg = await findAndInitSelfElementObj(guestOp, 'appium|id', 'com.imo.android.imoimalpha:id/x_item_content_view_root', null, -1);
     /** 获取文本内容，并对比 */
     msgContent = await findAndInitSelfElementObj(guestOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/tv_duration', lastMsg);
-    await assertMsgTime(guestOp, await msgContent.element.text(), msgObj.text);
+    await assertMsgTime(guestOp, await msgContent.element.text(), msgObj.duration);
 }
 
 /**
@@ -496,18 +545,18 @@ async function checkBGReplyMsgAction(hostOp, guestOp, checkText, msgObj) {
     replyContainer = await findAndInitSelfElementObj(hostOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/top_reply_container', targetMsg);
     if (replyContainer.element == null) {
         await hostOp.stepTag('主设备-已发送的消息中，没有出现回复消息的样式');
+    } else {
+        await hostOp.stepTag('主设备-检查回复消息的样式-通过');
     }
 
     /** 2、检查文字 */
     if (checkText) {
-        textContent = await findAndInitSelfElementObj(hostOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/reply_text_tv', replyContainer);
+        textContent = await findAndInitSelfElementObj(hostOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/reply_text_tv', targetMsg, -1);
         if (textContent.element == null) {
             await hostOp.stepTag('主设备-已发送的消息中，找不到对应的文本');
         } else {
             targetText = await textContent.element.text();
-            if (targetText.indexOf(msgObj.text) == -1) {
-                await hostOp.stepTag('主设备-已发送的消息中，发送的文本对不上');
-            }
+            await assertMsgText(hostOp, targetText, msgObj.text);
         }
     }
 
@@ -520,18 +569,18 @@ async function checkBGReplyMsgAction(hostOp, guestOp, checkText, msgObj) {
     replyContainer = await findAndInitSelfElementObj(guestOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/top_reply_container', targetMsg);
     if (replyContainer.element == null) {
         await guestOp.stepTag('副设备-已收取的消息中，没有出现回复消息的样式');
+    } else {
+        await hostOp.stepTag('副设备-检查回复消息的样式-通过');
     }
 
     /** 2、检查文字 */
     if (checkText) {
-        textContent = await findAndInitSelfElementObj(guestOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/reply_text_tv', replyContainer);
+        textContent = await findAndInitSelfElementObj(guestOp, 'appiumParent|id', 'com.imo.android.imoimalpha:id/reply_text_tv', targetMsg, -1);
         if (textContent.element == null) {
             await guestOp.stepTag('副设备-已发送的消息中，找不到对应的文本');
         } else {
             targetText = await textContent.element.text();
-            if (targetText.indexOf(msgObj.text) == -1) {
-                await guestOp.stepTag('副设备-已发送的消息中，发送的文本对不上');
-            }
+            await assertMsgText(guestOp, targetText, msgObj.text);
         }
     }
 }
@@ -543,7 +592,7 @@ async function checkBGReplyMsgAction(hostOp, guestOp, checkText, msgObj) {
  * @param {*} backName 需要返回的界面
  */
 async function checkBGShareAction(op, msgObj, backName) {
-    let targetMsg, msgImg, msgText, msgTime;
+    let targetMsg, msgImg, msgText;
 
     /** 回到首页 */
     await op.back();
@@ -554,11 +603,11 @@ async function checkBGShareAction(op, msgObj, backName) {
         /**  *********** 一、检查主设备  *********** */
         /** 上滑 */
         await swipeAction(op, 'up');
-        targetMsg = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/x_item_content_view_root', null, -1);
+        targetMsg = await findAndInitSelfElementObj(op, 'appium|xpath', "//*[contains(@resource-id,'x_item_content_view_root') or contains(@resource-id,'ml_content_wrapper')]", null, -1);
         /** 1、检查发送的内容 */
         msgImg = await findAndInitSelfElementObj(op, 'unq|', msgObj.imgName, targetMsg);
         if (msgImg.element == null) {
-            await hostOp.stepTag('主设备-分享的img 元素找不到 ');
+            await op.stepTag('主设备-分享的img 元素找不到 ');
         }
         /** 2、检查状态 */
         await assertStutas(op, targetMsg);
@@ -566,7 +615,7 @@ async function checkBGShareAction(op, msgObj, backName) {
         /**  *********** 一、检查主设备  *********** */
         /** 上滑 */
         await swipeAction(op, 'up');
-        targetMsg = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/x_item_content_view_root', null, -1);
+        targetMsg = await findAndInitSelfElementObj(op, 'appium|xpath', "//*[contains(@resource-id,'x_item_content_view_root') or contains(@resource-id,'ml_content_wrapper')]", null, -1);
 
         /** 1、检查字符串是否相等 */
         msgText = await targetMsg.element.element('id', 'com.imo.android.imoimalpha:id/tv_message');
@@ -587,8 +636,8 @@ async function checkBGShareAction(op, msgObj, backName) {
  * @returns num 当前这类型的文件有多少个
  */
 async function checkBGFileDownLoad(op, fileType) {
-    let numObj, num;
-    /** 进入文件 */
+    let numObj, num, operatorElement, clipBtn, fileEntrance, assistElement, numStr;
+
     await enterClipView(op, 'file');
 
     switch (fileType) {
@@ -612,7 +661,8 @@ async function checkBGFileDownLoad(op, fileType) {
             break;
     }
     /** 装入msgObj */
-    num = parseInt(await numObj.element.text().split(' ')[0]);
+    numStr = await numObj.element.text();
+    num = parseInt(numStr.split(' ')[0]);
 
     /** 返回聊天界面 */
     await op.back();
@@ -625,7 +675,7 @@ async function checkBGFileDownLoad(op, fileType) {
  * @returns num 当前IMO文件夹下有多少个资源
  */
 async function checkBGImageDowload(op) {
-    let operatorElement, albumEntrance, nubObj, num;
+    let nubObj, num;
 
     /** 进入相册界面 */
     await enterClipView(op, 'gallery');
@@ -635,7 +685,12 @@ async function checkBGImageDowload(op) {
 
     /** 获取IMO文件夹的数量 */
     numObj = await findAndInitSelfElementObj(op, 'appium|xpath', "//android.widget.TextView[@text='imo']/following-sibling::android.widget.TextView");
-    num = await nubObj.element.text();
+    if (numObj.element == null) {
+        num = 0;
+    } else {
+        num = await numObj.element.text();
+    }
+
     await op.back();
     await op.back();
     return num;
@@ -650,11 +705,13 @@ async function assertStutas(op, targetMsg) {
     let msgStatus = await findAndInitSelfElementObj(
         op,
         'appiumParent|xpath',
-        "//android.widget.ImageView[contains(@resource-id,'iv_mes_state') or contains(@resource-id,'com.imo.android.imoimalpha:id/iv_file_status')]",
+        "//android.widget.ImageView[contains(@resource-id,'iv_mes_state') or contains(@resource-id,'iv_file_status') or contains(@resource-id,'imkit_msg_state_')]",
         targetMsg
     );
     if (msgStatus.element == null) {
         await op.stepTag('该消息没有找到status');
+    } else {
+        await op.stepTag('主设备-检查消息状态成功！');
     }
 }
 
@@ -752,7 +809,7 @@ async function checkZonePost(op, checkObj) {
             {
                 /** 检查是否发送成功 */
                 targetObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/tv_time');
-                await assertMsgTime(op, await targetObj.element.text(), checkObj.time);
+                // await assertMsgTime(op, await targetObj.element.text(), checkObj.time);
                 if (!(await op.imgExist({ imgName: checkObj.imgName }))) {
                     await op.stepTag('没有找到刚刚发送的图片');
                 }
@@ -762,7 +819,7 @@ async function checkZonePost(op, checkObj) {
             {
                 /** 检查是否发送成功 */
                 targetObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/tv_time');
-                await assertMsgTime(op, await targetObj.element.text(), checkObj.time);
+                // await assertMsgTime(op, await targetObj.element.text(), checkObj.time);
                 if (!(await op.imgExist({ imgName: checkObj.imgName }))) {
                     await op.stepTag('没有找到刚刚发送的视频');
                 }
@@ -771,8 +828,8 @@ async function checkZonePost(op, checkObj) {
         case 'text': {
             /** 检查是否发送成功 */
             targetObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/tv_time');
-            await assertMsgTime(op, await targetObj.element.text(), checkObj.time);
-            targetObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/tv_content');
+            // await assertMsgTime(op, await targetObj.element.text(), checkObj.time);
+            targetObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/desc_tv');
             await assertMsgText(op, await targetObj.element.text(), checkObj.text);
         }
     }
@@ -796,4 +853,5 @@ module.exports = {
     checkBGShareAction,
     postAlbumZone,
     checkZonePost,
+    enterClipView,
 };

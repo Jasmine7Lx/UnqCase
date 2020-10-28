@@ -1,4 +1,4 @@
-const { splitAndGetSearchSpace, findAndInitSelfElementObj, getSpace, press, sleepAction, swipeAction, assertMsgText, pressByCoordinate } = require('../../commonMethod/baseActions');
+const { splitAndGetSearchSpace, findAndInitSelfElementObj, getSpace, press, sleepAction, swipeAction, assertMsgText, pressByCoordinate } = require('../commonMethod/baseActions');
 
 /**
  * 发送 Story
@@ -48,8 +48,8 @@ async function postStory(op, resourceType, sendWay, needPaint) {
         case 'takePhoto':
             await press(op, targetObj);
             break;
-        case 'tackVideo':
-            await press(op, targetObj, 5000);
+        case 'takeVideo':
+            await press(op, targetObj, 5);
             break;
         case 'selectPhoto':
             {
@@ -88,10 +88,10 @@ async function postStory(op, resourceType, sendWay, needPaint) {
     }
 
     /** 6、判断是否需要涂鸦 */
-    if (!isNaN(needPaint) || needPaint != false) {
+    if (needPaint != undefined && needPaint != false) {
         /** 进入涂鸦界面 */
         searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0.5, 1, 0, 0.2);
-        targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1600167435452', searchSpace);
+        targetObj = await findAndInitSelfElementObj(op, 'unq|true', 'scriptImg_1600167435452', searchSpace);
         await press(op, targetObj);
         /** 涂鸦 */
         await swipeAction(op, 'up');
@@ -104,12 +104,20 @@ async function postStory(op, resourceType, sendWay, needPaint) {
     /** 7、发送到My Story */
     if (sendWay == 'story') {
         searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0.7, 1, 0.7, 1);
-        targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1600160863147', searchSpace);
+        targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1602755078707', searchSpace);
         await press(op, targetObj);
     } else if (sendWay == 'FOF') {
         searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0.7, 1);
-        targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1600167752413', searchSpace);
+        targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1602754772068', searchSpace);
         await press(op, targetObj);
+        await sleepAction(2000);
+        searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0.4, 0.8);
+        targetObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1602821503407', searchSpace);
+        if (targetObj.element != null) {
+            searchSpace = await splitAndGetSearchSpace(await getSpace(op, 'window'), 0, 1, 0.4, 0.8);
+            let closeObj = await findAndInitSelfElementObj(op, 'unq|', 'scriptImg_1602821514222', searchSpace);
+            await press(op, closeObj);
+        }
     }
 
     /** 8、等待发送完成 */
@@ -135,8 +143,8 @@ async function postStory(op, resourceType, sendWay, needPaint) {
  */
 async function getStoryNum(op, targetName) {
     let assistObj, assistNum, storyNumObj, storyNum;
-    assistObj = await findAndInitSelfElementObj(op,"appium|id","com.imo.android.imoimalpha:id/stories");
-    /** 开始发布前，获取My Story 有多少个未读 */
+    assistObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/stories');
+    /** 开始发布前，获取目标 Story 有多少个未读 */
     storyNumObj = await findAndInitSelfElementObj(op, 'appium|xpath', "//android.widget.TextView[@resource-id='com.imo.android.imoimalpha:id/name' and @text='" + targetName + "']");
     assistNum = 0;
     while (storyNumObj.element == null) {
@@ -144,12 +152,11 @@ async function getStoryNum(op, targetName) {
         storyNumObj = await findAndInitSelfElementObj(op, 'appium|xpath', "//android.widget.TextView[@resource-id='com.imo.android.imoimalpha:id/name' and @text='" + targetName + "']");
         assistNum++;
         if (assistNum > 10) {
-            storyNum = 0;
             break;
         }
     }
     /** My Story 元素存在时，获取未读Story的数量 */
-    if (assistNum < 10) {
+    if (assistNum <= 10) {
         storyNumObj = await findAndInitSelfElementObj(
             op,
             'appium|xpath',
@@ -157,12 +164,14 @@ async function getStoryNum(op, targetName) {
         );
         if (storyNumObj.element != null) {
             storyNum = await storyNumObj.element.text();
+        } else {
+            storyNum = 0;
         }
+    } else {
+        storyNum = 0;
     }
     /** 回到发布story界面 */
-    for (let index = 0; index < assistNum; index++) {
-        await swipeAction(op, 'right', assistObj.space);
-    }
+    await correctStory(op);
     return storyNum;
 }
 
@@ -171,10 +180,10 @@ async function getStoryNum(op, targetName) {
  * @param {*} op 被操作的设备
  * @param {*} targetName 被查找的Story 名
  */
-async function searchStory(op,targetName){
+async function searchStory(op, targetName) {
     let assistObj, assistNum, storyNumObj, storyNum;
     /** 获取Story模块的区域 */
-    assistObj = await findAndInitSelfElementObj(op,"appium|id","com.imo.android.imoimalpha:id/stories");
+    assistObj = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha:id/stories');
     /** 根据名字来查找对应的Story */
     storyNumObj = await findAndInitSelfElementObj(op, 'appium|xpath', "//android.widget.TextView[@resource-id='com.imo.android.imoimalpha:id/name' and @text='" + targetName + "']");
     assistNum = 0;
