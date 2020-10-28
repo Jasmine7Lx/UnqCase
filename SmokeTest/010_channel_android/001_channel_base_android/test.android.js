@@ -19,12 +19,12 @@ const {
   findSwiftElementAction,
   storyCheckAction,
   chatCheckAction,
-} = require("../../commonMethod/channelActions.js");
+} = require("../../../commonMethod/channelActions.js");
 
 const {
   enterTargetChatView,
   sendLinkMsgAction,
-} = require("../../commonMethod/chatAssistActions.js");
+} = require("../../../commonMethod/chatAssistActions.js");
 
 /** 进入特定用户会话页，先删除相关的记录 */
 await enterTargetChatView(operation[0], "13609729257");

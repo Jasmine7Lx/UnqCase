@@ -6,19 +6,19 @@ module.exports = async function main (operation,directoryPath,directoryName) {
   await operation.init(directoryPath,directoryName);
 const {
   enterTargetChatView,
-} = require("../../commonMethod/chatAssistActions.js");
+} = require("../../../commonMethod/chatAssistActions.js");
 
 const {
   shareMoreAction,
   shareStoryAction,
   storyCheckAction,
   chatCheckAction,
-} = require("../../commonMethod/channelActions.js");
+} = require("../../../commonMethod/channelActions.js");
 
 const {
   swipeTimesAction,
   listSwipeAction,
-} = require("../../commonMethod/myplanetActions.js");
+} = require("../../../commonMethod/myplanetActions.js");
 
 /** 进入内容流 */
 let myplanetEntrance = await operation[0].driver.element(
