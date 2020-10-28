@@ -18,12 +18,11 @@ const {
   shareStoryAction,
   findSwiftElementAction,
   storyCheckAction,
-  chatCheckAction,
+  chatCheckAction
 } = require("../../../commonMethod/channelActions.js");
 
 const {
-  enterTargetChatView,
-  sendLinkMsgAction,
+  enterTargetChatView
 } = require("../../../commonMethod/chatAssistActions.js");
 
 /** 进入特定用户会话页，先删除相关的记录 */
@@ -350,7 +349,6 @@ await operation[0].back();
 
 /** 进入大群会话页检查 */
 await chatCheckAction(operation[0], "Super_Imo_Auto_Biggroup", accountChatImg);
-
 await operation[0].finishedCase(
   "channel_account_share_biggroupchat_android_001"
 );

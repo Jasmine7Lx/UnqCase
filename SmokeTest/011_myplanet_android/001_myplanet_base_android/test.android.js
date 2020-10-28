@@ -18,6 +18,8 @@ const {
 const {
   swipeTimesAction,
   listSwipeAction,
+  networkCheckAction,
+  followListSwipeAction
 } = require("../../../commonMethod/myplanetActions.js");
 
 /** 进入内容流 */
@@ -57,33 +59,12 @@ await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
 await operation[0].imgTap({ imgName: "scriptImg_1597394955549" });
 
 /** 滑动列表--个人页post列表 */
-for (var i = 0; i <= 3; i++) {
-  await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-}
+await swipeTimesAction(operation[0], "up", 12);
 //判断列表是否网络异常
-let refreshElement = await operation[0].elementExist(
-  '{"elementKey":"elementKeyNum_1254","platformName":"Android"}'
-);
-if (refreshElement) {
-  let refreshButton = await operation[0].driver.element(
-    "id",
-    "com.imo.android.imoimalpha:id/topic_empty_refresh"
-  );
-  await refreshButton.click();
-  for (var i = 0; i <= 10; i++) {
-    await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-  }
-  await operation[0].finishedCase(
-    "myplanet_list_profile_posts_swipe_android_001"
-  );
-} else {
-  for (var i = 0; i <= 10; i++) {
-    await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-  }
-  await operation[0].finishedCase(
-    "myplanet_list_profile_posts_swipe_android_001"
-  );
-}
+await networkCheckAction(operation[0]);
+await swipeTimesAction(operation[0], "up", 20);
+await operation[0].finishedCase("myplanet_list_profile_posts_swipe_android_001");
+
 
 /** 滑动列表--个人页likes列表 */
 let likeList = await operation[0].driver.element(
@@ -91,16 +72,15 @@ let likeList = await operation[0].driver.element(
   "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='Likes']"
 );
 await likeList.click();
-for (var i = 0; i <= 10; i++) {
-  await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-}
+await swipeTimesAction(operation[0], "up", 20);
 await operation[0].finishedCase(
   "myplanet_list_profile_likes_swipe_android_001"
 );
 await operation[0].driver.back();
 await operation[0].driver.back();
 
-/** 滑动列表 -- 关注 */
+
+
 /** 进入联系人tab-关注列表 */
 let contactsEntrance = await operation[0].driver.element(
   "xpath",
@@ -108,59 +88,20 @@ let contactsEntrance = await operation[0].driver.element(
 );
 await contactsEntrance.click();
 await operation[0].imgTap({ imgName: "scriptImg_1593397225485" });
-//判断关注按钮是否存在确认页面是否加载完成
-try {
-  let unfollowButton = await operation[0].driver.element(
-    "id",
-    "com.imo.android.imoimalpha:id/ic_followed"
-  );
-  for (var i = 0; i <= 10; i++) {
-    await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-  }
-  await operation[0].finishedCase("myplanet_list_following_swipe_android_001");
-} catch (error) {
-  await operation[0].stepTag("关注列表数据不存在");
-}
+
+/** 滑动列表 -- 关注 */
+await followListSwipeAction(operation[0], "following");
+await operation[0].finishedCase("myplanet_list_following_swipe_android_001");
+
 
 /** 滑动列表--粉丝 */
-let followersTab = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='Followers']"
-);
-await followersTab.click();
-//判断关注按钮是否存在确认页面是否加载完成
-try {
-  let followButton = await operation[0].driver.element(
-    "id",
-    "com.imo.android.imoimalpha:id/btn_follow"
-  );
-  for (var i = 0; i <= 10; i++) {
-    await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-  }
-  await operation[0].finishedCase("myplanet_list_followers_swipe_android_001");
-} catch (error) {
-  await operation[0].stepTag("粉丝列表数据不存在");
-}
+await followListSwipeAction(operation[0], "followers");
+await operation[0].finishedCase("myplanet_list_followers_swipe_android_001");
+
 
 /** 滑动列表 -- 推荐 */
-let recommendTab = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='Recommend']"
-);
-await recommendTab.click();
-//判断关注按钮是否存在确认页面是否加载完成
-try {
-  let followButton = await operation[0].driver.element(
-    "id",
-    "com.imo.android.imoimalpha:id/btn_follow"
-  );
-  for (var i = 0; i <= 10; i++) {
-    await operation[0].swipe(522 / 1080, 1645 / 1920, 505 / 1080, 371 / 1920);
-  }
-  await operation[0].finishedCase("myplanet_list_recommend_swipe_android_001");
-} catch (error) {
-  await operation[0].stepTag("推荐列表数据不存在");
-}
+await followListSwipeAction(operation[0], "recommend");
+await operation[0].finishedCase("myplanet_list_recommend_swipe_android_001");
 
 //返回上一层
 await operation[0].back();
@@ -169,7 +110,7 @@ await operation[0].back();
 /** --------------------------------------- 发布功能 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 检查图片选择器内容 **/
-// myplanetEntrance = await operation[0].driver.element("xpath","//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='MyPlanet']");  //调试用，后续可删
+myplanetEntrance = await operation[0].driver.element("xpath","//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='MyPlanet']"); 
 await myplanetEntrance.click();
 await operation[0].imgTap({ imgName: "scriptImg_1598405636657" });
 if (await operation[0].imgExist({ imgName: "scriptImg_1599114181526" })) {
@@ -654,10 +595,6 @@ await operation[0].back();
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 图片帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
-const {
-  enterTargetChatView,
-} = require("../../commonMethod/chatAssistActions.js");
-
 /** 进入特定用户会话页，进入profile页 */
 await enterTargetChatView(operation[0], "Imo_Auto_B");
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
@@ -698,8 +635,8 @@ await operation[0].back();
 await operation[0].back();
 
 /** 进入story检查 */
-let videoStoryImg = "scriptImg_1603188745749";
-await storyCheckAction(operation[0], videoStoryImg);
+let photoStoryImg = "scriptImg_1603188745749";
+await storyCheckAction(operation[0], photoStoryImg);
 await operation[0].finishedCase("myplanet_photo_share_story_android_001");
 
 let photoChatImg = "scriptImg_1603200409827";

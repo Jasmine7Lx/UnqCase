@@ -1,16 +1,13 @@
 const {
-    splitAndGetSearchSpace,
     findAndInitSelfElementObj,
     swipeAction,
     getSpace,
-    press,
-    pressByCoordinate,
-    assertMsgText,
-    getInputString,
-    assertMsgTime,
-    sleepAction,
-    getTime,
+    press
 } = require('../commonMethod/baseActions');
+
+const {
+    closeBigGroupPopWindow
+  } = require("../commonMethod/bigGroupActions.js");
 
 const {
     sendLinkMsgAction,
@@ -247,6 +244,7 @@ async function storyCheckAction(op, targerImgName) {
 
 async function chatCheckAction(op, chatName, targerImgName) {
     await enterTargetChatView(op, chatName);
+    await closeBigGroupPopWindow(operation[0]);
     //处理命中表情引导
     let chatInput = await op.driver.element(
         "id",
