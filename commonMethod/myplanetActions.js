@@ -97,7 +97,7 @@ async function networkCheckAction(op) {
 async function followListSwipeAction(op, listType) {
     let followButton = await findAndInitSelfElementObj(op, "appium|id", "com.imo.android.imoimalpha:id/btn_follow");
     let unfollowButton = await findAndInitSelfElementObj(op, "appium|id", "com.imo.android.imoimalpha:id/ic_followed");
-    
+
     switch (listType) {
         case 'following':
             let followingTab = await op.driver.element(
@@ -115,7 +115,7 @@ async function followListSwipeAction(op, listType) {
             let followersTab = await op.driver.element(
                 "xpath",
                 "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='Followers']"
-              );
+            );
             await followersTab.click();
             if (followButton != null) {
                 await swipeTimesAction(op, "up", 15);
@@ -127,7 +127,7 @@ async function followListSwipeAction(op, listType) {
             let recommendTab = await op.driver.element(
                 "xpath",
                 "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='Recommend']"
-              );
+            );
             await recommendTab.click();
             if (followButton != null) {
                 await swipeTimesAction(op, "up", 15);
@@ -138,11 +138,68 @@ async function followListSwipeAction(op, listType) {
     }
 }
 
+
+
+
 /** =========================================================================== */
 /** ================================ 发布帖子 ================================== */
 /** =========================================================================== */
+/** 添加话题-固定选话题列表第一个话题 */
+async function publishAddTopic(op) {
+    let topicListEntrance = await findAndInitSelfElementObj(op, "appium|id", "com.imo.android.imoimalpha:id/selected_topic_container");
+    await topicListEntrance.click();
+    let topicList = await op.driver.elements("id", "com.imo.android.imoimalpha:id/list_view");
+    await topicList[1].click();
+}
+
+/** 添加定位 */
+async function publishAddLocation(op, locationName) {
+    let locationEntrance = await op.driver.element("id", "com.imo.android.imoimalpha:id/location_container");
+    await locationEntrance.click();
+    //授权定位
+    if (
+        await op.removeBackgroundExist({
+            imgName: "scriptImg_1597399803799",
+        })
+    ) {
+        await op.permissionAllow();
+    }
+    let searchBar = await op.driver.element("id", "com.imo.android.imoimalpha:id/tv_search_entry");
+    await searchBar.click();
+    let searchBar2 = await op.driver.element("id", "com.imo.android.imoimalpha:id/et_search_place");
+    await searchBar2.click();
+    await op.keys(locationName);
+    let searchButton = await op.driver.element("id", "com.imo.android.imoimalpha:id/btn_search");
+    await searchButton.click();
+    let searchResult = await op.driver.elements("id", "com.imo.android.imoimalpha:id/recycler_view");
+    // await op.stepTag(searchResult[0]);
+    await searchResult[0].click();
+}
+
+
 async function publishPostAction(op, postType) {
-    
+    if (await op.imgExist({ imgName: "scriptImg_1599114181526" })) {
+        await op.back();
+    }
+    switch (postType) {
+        case 'photo':
+            await op.imgTap({ imgName: "scriptImg_1598405796627" });
+            if (
+                await op.removeBackgroundExist({
+                    imgName: "scriptImg_1597399803799",
+                })
+            ) {
+                await op.permissionAllow();
+            }
+            await op.imgTap({ imgName: "scriptImg_1598408622457" });
+            await op.imgTap({ imgName: "scriptImg_1597395689900" });
+            await op.keys("auto_photo");
+            break;
+
+        default:
+            break;
+    }
+
 }
 
 
@@ -156,5 +213,7 @@ module.exports = {
     swipeTimesAction,
     listSwipeAction,
     networkCheckAction,
-    followListSwipeAction
+    followListSwipeAction,
+    publishAddTopic,
+    publishAddLocation
 }
