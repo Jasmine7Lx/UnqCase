@@ -26,7 +26,7 @@ const {
 } = require("../../../commonMethod/chatAssistActions.js");
 
 /** 进入特定用户会话页，先删除相关的记录 */
-await enterTargetChatView(operation[0], "13609729257");
+await enterTargetChatView(operation[0], "Imo_Auto_B");
 await deleteChatAction(operation[0]);
 
 /** ---------------------------------------------------------------------------------------  */
@@ -381,7 +381,7 @@ await operation[0].back();
 /** --------------------------------------- 天气服务号 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 进入特定用户会话页，先删除相关的记录 */
-await enterTargetChatView(operation[0], "13609729257");
+await enterTargetChatView(operation[0], "Imo_Auto_B");
 await deleteChatAction(operation[0]);
 
 /** 进入天气服务号页面 */
@@ -458,7 +458,7 @@ await operation[0].back();
 /** ---------------------------------------------------------------------------------------  */
 
 /** 进入特定用户会话页，先删除相关的记录 */
-await enterTargetChatView(operation[0], "13609729257");
+await enterTargetChatView(operation[0], "Imo_Auto_B");
 await deleteChatAction(operation[0]);
 
 /** 进入祷告服务号 */

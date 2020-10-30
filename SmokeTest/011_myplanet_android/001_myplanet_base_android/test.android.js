@@ -6,47 +6,61 @@ module.exports = async function main (operation,directoryPath,directoryName) {
   await operation.init(directoryPath,directoryName);
 const {
   enterTargetChatView,
+  sendLinkMsgAction
 } = require("../../../commonMethod/chatAssistActions.js");
 
 const {
+  press,
+  findAndInitSelfElementObj,
+} = require("../../../commonMethod/baseActions.js");
+
+const {
+  followPopAction,
+  unfollowAction,
+  deleteChatAction,
+  enterChannelbyLink,
+  searchCityAction,
   shareMoreAction,
   shareStoryAction,
+  findSwiftElementAction,
   storyCheckAction,
   chatCheckAction,
 } = require("../../../commonMethod/channelActions.js");
 
 const {
   swipeTimesAction,
-  listSwipeAction,
+  listEnterAction,
   networkCheckAction,
-  followListSwipeAction
+  followListSwipeAction,
+  publishAddLocation,
+  publishAddTopic,
+  publishPostAction,
+  postCheckAction,
+  postDeleteAction,
 } = require("../../../commonMethod/myplanetActions.js");
 
-/** 进入内容流 */
-let myplanetEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='MyPlanet']"
-);
-await myplanetEntrance.click();
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- myplanet内列表滑动------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 滑动列表--关注流 */
-await listSwipeAction(operation[0], "friends", "up", 20);
+await listEnterAction(operation[0], "friends");
+await swipeTimesAction(operation[0], "up", 20);
 await operation[0].finishedCase("myplanet_list_friends_swipe_android_001");
 
 // /** 滑动列表--话题详情页 */
-// await listSwipeAction(operation[0], "topic", "up", 20);
+// await listEnterAction(operation[0], "topic", "up", 20);
 // await operation[0].finishedCase("myplanet_list_topic_swipe_android_001");
 // await operation[0].back();
 
 /** 滑动列表--推荐流 */
-await listSwipeAction(operation[0], "foryou", "up", 20);
+await listEnterAction(operation[0], "foryou");
+await swipeTimesAction(operation[0], "up", 20);
 await operation[0].finishedCase("myplanet_list_foryou_swipe_android_001");
 
 /** 滑动列表--通知中心 */
-await listSwipeAction(operation[0], "notice", "up", 10);
+await listEnterAction(operation[0], "notice");
+await swipeTimesAction(operation[0], "up", 10);
 await operation[0].finishedCase("myplanet_list_notice_swipe_android_001");
 await operation[0].driver.back();
 
@@ -63,8 +77,9 @@ await swipeTimesAction(operation[0], "up", 12);
 //判断列表是否网络异常
 await networkCheckAction(operation[0]);
 await swipeTimesAction(operation[0], "up", 20);
-await operation[0].finishedCase("myplanet_list_profile_posts_swipe_android_001");
-
+await operation[0].finishedCase(
+  "myplanet_list_profile_posts_swipe_android_001"
+);
 
 /** 滑动列表--个人页likes列表 */
 let likeList = await operation[0].driver.element(
@@ -79,8 +94,6 @@ await operation[0].finishedCase(
 await operation[0].driver.back();
 await operation[0].driver.back();
 
-
-
 /** 进入联系人tab-关注列表 */
 let contactsEntrance = await operation[0].driver.element(
   "xpath",
@@ -93,11 +106,9 @@ await operation[0].imgTap({ imgName: "scriptImg_1593397225485" });
 await followListSwipeAction(operation[0], "following");
 await operation[0].finishedCase("myplanet_list_following_swipe_android_001");
 
-
 /** 滑动列表--粉丝 */
 await followListSwipeAction(operation[0], "followers");
 await operation[0].finishedCase("myplanet_list_followers_swipe_android_001");
-
 
 /** 滑动列表 -- 推荐 */
 await followListSwipeAction(operation[0], "recommend");
@@ -110,7 +121,10 @@ await operation[0].back();
 /** --------------------------------------- 发布功能 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 检查图片选择器内容 **/
-myplanetEntrance = await operation[0].driver.element("xpath","//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='MyPlanet']"); 
+let myplanetEntrance = await operation[0].driver.element(
+  "xpath",
+  "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='MyPlanet']"
+);
 await myplanetEntrance.click();
 await operation[0].imgTap({ imgName: "scriptImg_1598405636657" });
 if (await operation[0].imgExist({ imgName: "scriptImg_1599114181526" })) {
@@ -127,61 +141,17 @@ await operation[0].finishedCase("myplanet_publish_uicheck_android_001");
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 发布图片帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
-/**  拍摄图片  **/
-await operation[0].imgTap({ imgName: "scriptImg_1598405796627" });
-if (
-  await operation[0].removeBackgroundExist({
-    imgName: "scriptImg_1597399803799",
-  })
-) {
-  await operation[0].permissionAllow();
-}
-await operation[0].imgTap({ imgName: "scriptImg_1598408622457" });
-await operation[0].imgTap({ imgName: "scriptImg_1597395689900" });
+/**  发布图片  **/
+await publishPostAction(operation[0], "photo", true, true, true, "delhi");
 
-/**  发布页面添加文本/话题/@人/定位  */
-await operation[0].keys("auto_photo");
-await operation[0].imgTap({ imgName: "scriptImg_1598580942858" });
-await operation[0].imgTap({ imgName: "scriptImg_1598594824118" });
-await operation[0].imgTap({ imgName: "scriptImg_1598586403918" });
-//授权定位
-if (
-  await operation[0].removeBackgroundExist({
-    imgName: "scriptImg_1597399803799",
-  })
-) {
-  await operation[0].permissionAllow();
-}
-await operation[0].imgTap({ imgName: "scriptImg_1597400059257" });
-await operation[0].keys("Delhi");
-await operation[0].imgTap({ imgName: "scriptImg_1598594941444" });
-await operation[0].imgTap({ imgName: "scriptImg_1598586560542" });
-await operation[0].imgTap({ imgName: "scriptImg_1598586574452" });
-let checkBox = await operation[0].driver.element(
-  "id",
-  "com.imo.android.imoimalpha:id/checkbox"
-);
-await checkBox.click();
-await operation[0].imgTap({ imgName: "scriptImg_1597400447945" });
-
-//确认发布
-await operation[0].imgTap({ imgName: "scriptImg_1597400447945" });
 await new Promise((resolve) => setTimeout(resolve, 5000));
-//等待15s发不出去即失败
-if (await operation[0].imgExist({ imgName: "scriptImg_1598599001547" })) {
-  await new Promise((resolve) => setTimeout(resolve, 15000));
-  await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598599001547" });
-  await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598599310204" });
-}
+
 //判断是否发送成功
-await operation[0].imgAssert({ imgName: "scriptImg_1598601570453" });
+await postCheckAction(operation[0], "scriptImg_1598601570453");
 await operation[0].finishedCase("myplanet_publish_photo_android_001");
 
 //删除已发布帖子
-await operation[0].imgTap({ imgName: "scriptImg_1598595296555" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595306515" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595522057" });
-await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598601570453" });
+await postDeleteAction(operation[0], "scriptImg_1598601570453");
 await operation[0].finishedCase("myplanet_publish_delete_android_001");
 
 /** ---------------------------------------------------------------------------------------  */
@@ -189,129 +159,72 @@ await operation[0].finishedCase("myplanet_publish_delete_android_001");
 /** ---------------------------------------------------------------------------------------  */
 /** 拍摄10s视频 */
 await operation[0].imgTap({ imgName: "scriptImg_1598405636657" });
-await operation[0].imgTap({ imgName: "scriptImg_1598405796627" });
-//授权录制
-if (
-  await operation[0].removeBackgroundExist({
-    imgName: "scriptImg_1597399803799",
-  })
-) {
-  await operation[0].permissionAllow();
-}
-await operation[0].imgTap({
-  imgName: "scriptImg_1598408622457",
-  clickTime: 10000,
-});
-await operation[0].imgTap({ imgName: "scriptImg_1597395689900" });
-/** 添加文本内容 */
-await operation[0].keys("auto_video");
-/** 发送并等待5s */
-await operation[0].imgTap({ imgName: "scriptImg_1597400447945" });
+await publishPostAction(operation[0], "video");
+
 await new Promise((resolve) => setTimeout(resolve, 5000));
 
-/** 等待15s发不出去即失败 */
-if (await operation[0].imgExist({ imgName: "scriptImg_1598599001547" })) {
-  await new Promise((resolve) => setTimeout(resolve, 15000));
-  await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598599001547" });
-  await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598599310204" });
-}
 /** 判断是否发送成功 */
-await operation[0].imgAssert({ imgName: "scriptImg_1598601570453" });
+await postCheckAction(operation[0], "scriptImg_1598601570453");
 await operation[0].finishedCase("myplanet_publish_video_android_001");
 
 //删除已发布帖子
-await operation[0].imgTap({ imgName: "scriptImg_1598595296555" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595306515" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595522057" });
-await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598601570453" });
+await postDeleteAction(operation[0], "scriptImg_1598601570453");
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 发布链接帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 进入特定用户会话页，先删除相关的记录 */
-await operation[0].imgTap({ imgName: "scriptImg_1593766542666" });
-await operation[0].keys("13609729257");
-await operation[0].imgTap({ imgName: "scriptImg_1597394877585" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
-await operation[0].imgTap({ imgName: "scriptImg_1597397967493" });
-await operation[0].imgTap({ imgName: "scriptImg_1597398677059" });
+await enterTargetChatView(operation[0], "Imo_Auto_B");
+await deleteChatAction(operation[0]);
 
 /** 从会话发送链接并分享到内容流 */
-await operation[0].keys("https://m.imo.im");
-await operation[0].imgTap({ imgName: "scriptImg_1597395689900" });
+await sendLinkMsgAction(operation[0], "https://m.imo.im", "scriptImg_1597395723143")
 
 /** 复制链接 */
-await operation[0].removeBackgroundTap({
-  imgName: "scriptImg_1597395723143",
-  clickTime: 3000,
-});
+let linkChat = await findAndInitSelfElementObj(
+  op,
+  "appium|id",
+  "com.imo.android.imoimalpha:id/web_preview_title_b"
+);
+await press(operation[0], linkChat, 3); 
 await operation[0].imgTap({ imgName: "scriptImg_1598450933414" });
 
 /** 选择分享到myplanet */
-await operation[0].elementTap(
-  '{"elementKey":"elementKeyNum_1233","platformName":"Android"}'
-);
-await operation[0].imgTap({ imgName: "scriptImg_1598603579123" });
+await shareStoryAction(operation[0], "myplanet");
 
 /** 返回内容流并检查发送成功 */
 await operation[0].back();
-myplanetEntrance = await operation[0].driver.element(
-  "xpath",
-  "//*[@resource-id='com.imo.android.imoimalpha:id/tv_tab_text'][@text='MyPlanet']"
-); //调试用，后续可删
-await myplanetEntrance.click();
-await operation[0].imgTap({ imgName: "scriptImg_1598606903620" });
-await operation[0].imgAssert({ imgName: "scriptImg_1598606574767" });
+await listEnterAction(operation[0], "friends");
+await postDeleteAction(operation[0], "scriptImg_1598606574767");
 await operation[0].finishedCase("myplanet_publish_link_android_001");
 
 //删除已发布帖子
-await operation[0].imgTap({ imgName: "scriptImg_1598595296555" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595306515" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595522057" });
-await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598606574767" });
+await postDeleteAction(operation[0], "scriptImg_1598606574767");
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 发布图文帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
 /** 选择text-card*/
 await operation[0].imgTap({ imgName: "scriptImg_1598405636657" });
-await operation[0].imgTap({ imgName: "scriptImg_1598405789160" });
-await operation[0].keys("auto_text_card");
-let textCards = await operation[0].driver.elements(
-  "id",
-  "com.imo.android.imoimalpha:id/image_view"
-);
-await textCards[2].click();
-/** 发送并等待5s */
-await operation[0].imgTap({ imgName: "scriptImg_1597400447945" });
+await publishPostAction(operation[0], "textcard");
+
 await new Promise((resolve) => setTimeout(resolve, 5000));
 
-/** 等待15s发不出去即失败 */
-if (await operation[0].imgExist({ imgName: "scriptImg_1598599001547" })) {
-  await new Promise((resolve) => setTimeout(resolve, 15000));
-  await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598599001547" });
-  await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598599310204" });
-}
 /** 判断是否发送成功 */
-await operation[0].imgAssert({ imgName: "scriptImg_1598608993640" });
+await postCheckAction(operation[0], "scriptImg_1598608993640");
 await operation[0].finishedCase("myplanet_publish_textcard_android_001");
 
 //删除已发布帖子
-await operation[0].imgTap({ imgName: "scriptImg_1598595296555" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595306515" });
-await operation[0].imgTap({ imgName: "scriptImg_1598595522057" });
-await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598606574767" });
-
-/** 进入Imo_Auto_B资料页 */
-await operation[0].imgTap({ imgName: "scriptImg_1593766542666" });
-await operation[0].keys("18022402404");
-await operation[0].imgTap({ imgName: "scriptImg_1597394877585" });
-await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
-await operation[0].imgTap({ imgName: "scriptImg_1597394955549" });
+await postDeleteAction(operation[0], "scriptImg_1598608993640");
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- 链接帖子 ------------------------------------  */
 /** ---------------------------------------------------------------------------------------  */
+/** 进入Imo_Auto_B资料页 */
+await enterTargetChatView(operation[0], "Imo_Auto_B");
+await operation[0].removeBackgroundTap({ imgName: "scriptImg_1597394945015" });
+await operation[0].imgTap({ imgName: "scriptImg_1597394955549" });
+
 /** 进入详情页--链接帖子 */
 let myplanet_link = await operation[0].imgExist({
   imgName: "scriptImg_1598606574767",
@@ -657,13 +570,6 @@ await operation[0].finishedCase(
 );
 await operation[0].back();
 await operation[0].back();
-
-//删除已发布帖子
-// await operation[0].imgTap({imgName:'scriptImg_1598595296555'});
-// await operation[0].imgTap({imgName:'scriptImg_1598595306515'})
-// await operation[0].imgTap({imgName:'scriptImg_1598595522057'});
-// await operation[0].imgNotExistAssert({imgName:'scriptImg_1598601570453'});
-// await operation[0].finishedCase('myplanet_publish_delete_android_001');
 
   await operation.resultOutput();
 }
