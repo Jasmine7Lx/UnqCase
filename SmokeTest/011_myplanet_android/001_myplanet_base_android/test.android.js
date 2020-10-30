@@ -182,7 +182,7 @@ await sendLinkMsgAction(operation[0], "https://m.imo.im", "scriptImg_15973957231
 
 /** 复制链接 */
 let linkChat = await findAndInitSelfElementObj(
-  op,
+  operation[0],
   "appium|id",
   "com.imo.android.imoimalpha:id/web_preview_title_b"
 );
@@ -195,7 +195,7 @@ await shareStoryAction(operation[0], "myplanet");
 /** 返回内容流并检查发送成功 */
 await operation[0].back();
 await listEnterAction(operation[0], "friends");
-await postDeleteAction(operation[0], "scriptImg_1598606574767");
+await postCheckAction(operation[0], "scriptImg_1598606574767");
 await operation[0].finishedCase("myplanet_publish_link_android_001");
 
 //删除已发布帖子
