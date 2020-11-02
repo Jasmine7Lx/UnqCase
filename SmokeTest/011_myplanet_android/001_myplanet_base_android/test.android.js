@@ -462,7 +462,13 @@ await operation[0].finishedCase("myplanet_video_full_screen_play_android_001");
 
 /** 非全屏播放 -- 视频帖子 */
 await operation[0].removeBackgroundTap({ imgName: "scriptImg_1598695415917" });
-await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598671449930" });
+try {
+  await operation[0].imgNotExistAssert({ imgName: "scriptImg_1598671449930" });
+  await operation[0].stepTag("视频自动播放");
+} catch {
+  await operation[0].stepTag("视频未自动播放");
+}
+
 await operation[0].finishedCase("myplanet_video_play_android_001");
 
 /** ---------------------------------------------------------------------------------------  */
