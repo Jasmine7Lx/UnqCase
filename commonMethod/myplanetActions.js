@@ -148,7 +148,7 @@ async function followListSwipeAction(op, listType) {
 async function publishAddTopic(op) {
     let topicListEntrance = await op.driver.element("id", "com.imo.android.imoimalpha:id/selected_topic_container");
     await topicListEntrance.click();
-    await sleepAction(2000);
+    await sleepAction(3000);
     let topicList = await findAndInitSelfElementObj(op, "appium|id", "com.imo.android.imoimalpha:id/name", null, 1);
     await topicList.element.click();
 }
@@ -172,6 +172,7 @@ async function publishAddLocation(op, locationName) {
     await op.keys(locationName);
     let searchButton = await op.driver.element("id", "com.imo.android.imoimalpha:id/btn_search");
     await searchButton.click();
+    await sleepAction(2000);
     let searchResult = await op.driver.elements("id", "com.imo.android.imoimalpha:id/tv_name");
     await searchResult[0].click();
 }
@@ -242,6 +243,7 @@ async function publishPostAction(op, postType, ifAddTopic, ifAddLocation, ifAddP
     if (ifAddPeople) {
         await publishAddPeople(op);
     }
+    await sleepAction(2000);
     publishButton = await findAndInitSelfElementObj(op, "appium|id", "com.imo.android.imoimalpha:id/iv_scene");
     await publishButton.element.click();
 }
@@ -267,7 +269,7 @@ async function postCheckAction(op, postImgName) {
 
 
 /** =========================================================================== */
-/** ================================ 帖子发布检查 ================================== */
+/** ================================ 帖子删除 ================================== */
 /** =========================================================================== */
 async function postDeleteAction(op, postImgName) {
     let moreButton = await findAndInitSelfElementObj(op, "appium|id", "com.imo.android.imoimalpha:id/ivMore");
@@ -277,10 +279,10 @@ async function postDeleteAction(op, postImgName) {
     let comfirmButton = await findAndInitSelfElementObj(op, "appium|id", "com.imo.android.imoimalpha:id/btn_positive");
     await comfirmButton.element.click();
     try {
-        await operation[0].imgNotExistAssert({ imgName: postImgName });
-        await op.stepTag("帖子删除成功")
-    } catch {
+        await operation[0].imgAssert({ imgName: postImgName });
         await op.stepTag("帖子删除失败")
+    } catch {
+        await op.stepTag("帖子删除成功")
     }
 }
 

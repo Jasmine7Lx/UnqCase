@@ -6,7 +6,7 @@ module.exports = async function main (operation,directoryPath,directoryName) {
   await operation.init(directoryPath,directoryName);
 const {
   enterTargetChatView,
-  sendLinkMsgAction
+  sendLinkMsgAction,
 } = require("../../../commonMethod/chatAssistActions.js");
 
 const {
@@ -38,7 +38,6 @@ const {
   postCheckAction,
   postDeleteAction,
 } = require("../../../commonMethod/myplanetActions.js");
-
 
 /** ---------------------------------------------------------------------------------------  */
 /** --------------------------------------- myplanet内列表滑动------------------------------------  */
@@ -178,7 +177,11 @@ await enterTargetChatView(operation[0], "Imo_Auto_B");
 await deleteChatAction(operation[0]);
 
 /** 从会话发送链接并分享到内容流 */
-await sendLinkMsgAction(operation[0], "https://m.imo.im", "scriptImg_1597395723143")
+await sendLinkMsgAction(
+  operation[0],
+  "https://m.imo.im",
+  "scriptImg_1597395723143"
+);
 
 /** 复制链接 */
 let linkChat = await findAndInitSelfElementObj(
@@ -186,7 +189,7 @@ let linkChat = await findAndInitSelfElementObj(
   "appium|id",
   "com.imo.android.imoimalpha:id/web_preview_title_b"
 );
-await press(operation[0], linkChat, 3); 
+await press(operation[0], linkChat, 3);
 await operation[0].imgTap({ imgName: "scriptImg_1598450933414" });
 
 /** 选择分享到myplanet */
@@ -411,7 +414,7 @@ await operation[0].back();
 await operation[0].back();
 
 /** 进入story检查 */
-let linkStoryImg = "scriptImg_1599657131665";
+let linkStoryImg = "scriptImg_1603188745749";
 await storyCheckAction(operation[0], linkStoryImg);
 await operation[0].finishedCase("myplanet_link_share_story_android_001");
 

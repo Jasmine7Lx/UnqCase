@@ -43,8 +43,7 @@
 		"myplanet_photo_share_story_android_001",
 		"myplanet_photo_share_singlechat_android_001",
 		"myplanet_photo_share_groupchat_android_001",
-		"myplanet_photo_share_biggroupchat_android_001",
-		"myplanet_publish_delete_android_001"
+		"myplanet_photo_share_biggroupchat_android_001"
 	],
 	"version": 1,
 	"scriptIdentity": 1598845992205,

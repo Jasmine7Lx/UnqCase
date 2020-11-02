@@ -2,7 +2,8 @@ const {
     findAndInitSelfElementObj,
     swipeAction,
     getSpace,
-    press
+    press,
+    sleepAction
 } = require('../commonMethod/baseActions');
 
 const {
@@ -83,6 +84,7 @@ async function deleteChatAction(op) {
  */
 async function enterChannelbyLink(op, linkStr) {
     await sendLinkMsgAction(op, linkStr, "scriptImg_1597395723143");
+    await sleepAction(3000);
     await op.imgTap({ imgName: "scriptImg_1597395723143" });
 }
 
@@ -233,7 +235,7 @@ async function storyCheckAction(op, targerImgName) {
     } catch (err) {
     await op.stepTag("分享到story失败");
     }
-    await op.imgTap({ imgName: "scriptImg_1599657167481" });
+    await op.removeBackgroundTap({ imgName: "scriptImg_1599657167481" });
     await op.imgTap({ imgName: "scriptImg_1599657179326" });
     await op.back();
 }
@@ -244,7 +246,7 @@ async function storyCheckAction(op, targerImgName) {
 
 async function chatCheckAction(op, chatName, targerImgName) {
     await enterTargetChatView(op, chatName);
-    await closeBigGroupPopWindow(operation[0]);
+    await closeBigGroupPopWindow(op);
     //处理命中表情引导
     let chatInput = await op.driver.element(
         "id",
