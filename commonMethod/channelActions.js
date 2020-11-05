@@ -16,6 +16,22 @@ const {
 } = require('../commonMethod/chatAssistActions');
 
 /** =========================================================================== */
+/** ============================== 关注订阅号 ================================= */
+/** =========================================================================== */
+async function followAction(op) {
+    let followButton = await findAndInitSelfElementObj(op, 'appium|id', 'com.imo.android.imoimalpha.Channel:id/channel_profile_bottom_follow');
+    if (followButton.element != null) {
+        followButton.element.click();
+        await operation[0].imgAssert({
+            imgName: "scriptImg_1599127391430",
+        });
+    } else {
+        op.stepTag("订阅号已被关注");
+    }
+}
+
+
+/** =========================================================================== */
 /** ============================== 退出引导弹窗 ================================= */
 /** =========================================================================== */
 
@@ -49,6 +65,7 @@ async function followPopAction(op, selectAct) {
     }
 }
 
+
 /** =========================================================================== */
 /** =============================== 取关订阅号 ================================== */
 /** =========================================================================== */
@@ -56,6 +73,7 @@ async function followPopAction(op, selectAct) {
 async function unfollowAction(op) {
     await op.imgTap({ imgName: "scriptImg_1597398502063" });
     await op.imgTap({ imgName: "scriptImg_1597398539318" });
+    await op.sleepAction(2000);
 }
 
 /** =========================================================================== */
@@ -272,5 +290,6 @@ module.exports = {
     shareStoryAction,
     findSwiftElementAction,
     storyCheckAction,
-    chatCheckAction
+    chatCheckAction,
+    followAction
 };

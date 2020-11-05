@@ -18,12 +18,18 @@ const {
   shareStoryAction,
   findSwiftElementAction,
   storyCheckAction,
-  chatCheckAction
+  chatCheckAction,
+  followAction
 } = require("../../../commonMethod/channelActions.js");
 
 const {
   enterTargetChatView
 } = require("../../../commonMethod/chatAssistActions.js");
+
+const {
+  press,
+  findAndInitSelfElementObj,
+} = require("../../../commonMethod/baseActions.js");
 
 /** 进入特定用户会话页，先删除相关的记录 */
 await enterTargetChatView(operation[0], "Imo_Auto_B");
@@ -37,10 +43,7 @@ let commonChannelLink = "https://channel.imo.im/57532636";
 await enterChannelbyLink(operation[0], commonChannelLink);
 
 /** 关注订阅号 */
-await operation[0].imgTap({ imgName: "scriptImg_1597398414134" });
-await operation[0].imgAssert({
-  imgName: "scriptImg_1599127391430",
-});
+await followAction(operation[0]);
 await operation[0].finishedCase("channel_follow_android_001");
 
 /** ---------------------------------------------------------------------------------------  */
@@ -306,6 +309,7 @@ try {
 /** 进入设置页取关订阅号 */
 await operation[0].imgTap({ imgName: "scriptImg_1597395850651" });
 await unfollowAction(operation[0]);
+await sleepAction(2000);
 await operation[0].imgAssert({ imgName: "scriptImg_1599128209859" });
 
 /** ---------------------------------------------------------------------------------------  */
